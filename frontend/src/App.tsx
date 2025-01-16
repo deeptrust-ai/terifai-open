@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDaily } from "@daily-co/daily-react";
-import { ArrowRight, Ear} from "lucide-react";
+import { ArrowRight, Ear, Loader } from "lucide-react";
 
 import MaintenancePage from "./components/MaintenancePage";
 import Session from "./components/Session";
@@ -142,8 +142,12 @@ export default function App() {
       setState("error");
       return;
     }
-    // Away we go...
-    setState("connected");
+    // Either redirect or show Session based on redirect parameter
+    if (redirect) {
+      window.location.href = data?.room_url || roomUrl;
+    } else {
+      setState("connected");
+    }
   }
 
   async function leave() {
@@ -233,15 +237,33 @@ export default function App() {
             fullWidthMobile
             onClick={() => start(selectedPrompt, false)}
           >
-            Let's Chat
+            Let's Chat 😊
           </Button>
           <Button
             fullWidthMobile
             onClick={() => start(selectedPrompt, true)}
           >
-            Join Video Call
+            Join Call ☎️
           </Button>
         </CardFooter>
+      </Card>
+    );
+  }
+
+  if (state === "requesting_agent" || state === "connecting") {
+    return (
+      <Card shadow className="animate-appear max-w-lg">
+        <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
+          <div className="mt-8">
+            <Loader className="h-8 w-8 animate-spin text-primary" />
+          </div>
+          <CardTitle className="text-lg font-medium">
+            {state === "requesting_agent" ? "Starting AI Assistant..." : "Connecting to call..."}
+          </CardTitle>
+          <CardDescription className="text-center text-sm text-muted-foreground">
+            This will just take a moment
+          </CardDescription>
+        </CardContent>
       </Card>
     );
   }
