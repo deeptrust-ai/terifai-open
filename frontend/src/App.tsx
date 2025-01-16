@@ -288,7 +288,7 @@ export default function App() {
             {state === "requesting_agent" ? "Starting AI Assistant..." : "Connecting to call..."}
           </CardTitle>
           <CardDescription className="text-center text-sm text-muted-foreground">
-            This will just take a moment
+            Depending on traffic, this may take 1 to 2 minutes...
           </CardDescription>
         </CardContent>
       </Card>
