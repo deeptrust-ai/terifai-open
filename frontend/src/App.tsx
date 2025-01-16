@@ -212,7 +212,7 @@ export default function App() {
   if (state === "configuring_step2") {
     return (
       <Card shadow className="animate-appear max-w-lg">
-        <CardHeader className="relative">
+        <CardHeader className="relative space-y-6">
           <Button
             variant="ghost"
             size="sm"
@@ -221,31 +221,51 @@ export default function App() {
           >
             ← Back
           </Button>
-          <CardTitle>Customize Bot Behavior</CardTitle>
-          <CardDescription>
-            Choose how you want the bot to interact
-          </CardDescription>
+          <div className="space-y-1.5 pt-6">
+            <CardTitle>Customize Bot Behavior</CardTitle>
+            <CardDescription>
+              Choose how you want the bot to interact
+            </CardDescription>
+          </div>
         </CardHeader>
-        <CardContent stack>
-          <PromptSelect
-            selectedSetting={selectedPrompt}
-            onSettingChange={setSelectedPrompt}
-          />
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <PromptSelect
+              selectedSetting={selectedPrompt}
+              onSettingChange={setSelectedPrompt}
+            />
+          </div>
         </CardContent>
-        <CardFooter className="flex gap-2">
-          <Button
-            fullWidthMobile
-            onClick={() => start(selectedPrompt, false)}
-          >
-            Let's Chat 😊
-          </Button>
-          <Button
-            fullWidthMobile
-            onClick={() => start(selectedPrompt, true)}
-            disabled={true}
-          >
-            Join Call ☎️
-          </Button>
+        <CardFooter className="flex flex-col gap-2">
+          <div className="flex gap-3 w-full">
+            <div className="flex-1">
+              <Button
+                fullWidthMobile
+                size="lg"
+                className="w-full"
+                onClick={() => start(selectedPrompt, false)}
+              >
+                Let's Chat 😊
+              </Button>
+              <p className="text-xs text-muted-foreground mt-1.5 text-center">
+                1:1 conversation with TerifAI
+              </p>
+            </div>
+            <div className="flex-1">
+              <Button
+                fullWidthMobile
+                size="lg"
+                className="w-full"
+                onClick={() => start(selectedPrompt, true)}
+                disabled={true}
+              >
+                Join Call ☎️
+              </Button>
+              <p className="text-xs text-muted-foreground mt-1.5 text-center">
+                Open video call with TerifAI
+              </p>
+            </div>
+          </div>
         </CardFooter>
       </Card>
     );
