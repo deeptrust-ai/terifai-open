@@ -11,7 +11,7 @@ export const PromptSelect: React.FC<SelectProps> = ({
 }) => {
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="text-sm font-bold">Choose a Prompt/Scenario</h3>
+      <h3 className="text-sm font-bold">Choose a Scenario</h3>
       <Select
         onChange={(e) => {
           console.log('Selected prompt:', e.target.value);
@@ -20,7 +20,7 @@ export const PromptSelect: React.FC<SelectProps> = ({
         value={selectedSetting || "default"}
         icon={null}
       >
-        <option value="default">Select a Prompt</option>
+        <option value="default">Select a Scenario</option>
         <option value="corporate">Impersonation of Executive</option>
         <option value="it_support">IT Support Scam</option>
         <option value="finance_fraud">Finance Fraud</option>

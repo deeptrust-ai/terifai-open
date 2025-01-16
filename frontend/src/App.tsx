@@ -242,6 +242,7 @@ export default function App() {
           <Button
             fullWidthMobile
             onClick={() => start(selectedPrompt, true)}
+            disabled={true}
           >
             Join Call ☎️
           </Button>
