@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useDaily } from "@daily-co/daily-react";
-import { ArrowRight, Ear, Loader } from "lucide-react";
+import { Ear, Loader } from "lucide-react";
 
 import MaintenancePage from "./components/MaintenancePage";
 import Session from "./components/Session";
-import { Configure, PromptSelect, RoomSetup } from "./components/Setup";
+import { Configure, PromptSelect } from "./components/Setup";
 import { Alert } from "./components/ui/alert";
 import { Button } from "./components/ui/button";
 import {
@@ -20,7 +20,6 @@ import { fetch_create_room, fetch_start_agent } from "./actions";
 const isMaintenanceMode = import.meta.env.VITE_MAINTENANCE_MODE === "true";
 
 type State =
-  | "idle"
   | "configuring_step1"
   | "configuring_step2"
   | "requesting_agent"
@@ -42,13 +41,6 @@ const autoRoomCreation = parseInt(import.meta.env.VITE_MANUAL_ROOM_ENTRY)
 
 // Query string for room URL
 const roomQs = new URLSearchParams(window.location.search).get("room_url");
-const checkRoomUrl = (url: string | null): boolean =>
-  !!(url && /^(https?:\/\/[^.]+(\.staging)?\.daily\.co\/[^/]+)$/.test(url));
-
-// Show config options
-const showConfigOptions = parseInt(import.meta.env.VITE_SHOW_CONFIG)
-  ? true
-  : false;
 
 // Mic mode
 const isOpenMic = parseInt(import.meta.env.VITE_OPEN_MIC) ? true : false;
@@ -56,28 +48,11 @@ const isOpenMic = parseInt(import.meta.env.VITE_OPEN_MIC) ? true : false;
 export default function App() {
   const daily = useDaily();
 
-  const [state, setState] = useState<State>(
-    showConfigOptions ? "idle" : "configuring_step1"
-  );
-
+  const [state, setState] = useState<State>("configuring_step1");
   const [selectedPrompt, setSelectedPrompt] = useState("default");
   const [error, setError] = useState<string | null>(null);
   const [startAudioOff, setStartAudioOff] = useState<boolean>(false);
-  const [roomUrl, setRoomUrl] = useState<string | null>(roomQs || null);
-  const [roomError, setRoomError] = useState<boolean>(
-    (roomQs && checkRoomUrl(roomQs)) || false
-  );
-
-  function handleRoomUrl() {
-    console.log("here", autoRoomCreation, serverUrl, checkRoomUrl(roomUrl));
-    if ((autoRoomCreation && serverUrl) || checkRoomUrl(roomUrl)) {
-      console.log("here");
-      setRoomError(false);
-      setState("configuring_step1");
-    } else {
-      setRoomError(true);
-    }
-  }
+  const [roomUrl] = useState<string | null>(roomQs || null);
 
   async function start(selectedPrompt: string, redirect: boolean) {
     if (!daily || (!roomUrl && !autoRoomCreation)) return;
@@ -153,7 +128,7 @@ export default function App() {
   async function leave() {
     await daily?.leave();
     await daily?.destroy();
-    setState(showConfigOptions ? "idle" : "configuring" as State);
+    setState("configuring_step1");
   }
 
   if (isMaintenanceMode) {
@@ -277,52 +252,19 @@ export default function App() {
     );
   }
 
-  if (state === "requesting_agent" || state === "connecting") {
-    return (
-      <Card shadow className="animate-appear max-w-lg">
-        <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
-          <div className="mt-8">
-            <Loader className="h-8 w-8 animate-spin text-primary" />
-          </div>
-          <CardTitle className="text-lg font-medium">
-            {state === "requesting_agent" ? "Starting AI Assistant..." : "Connecting to call..."}
-          </CardTitle>
-          <CardDescription className="text-center text-sm text-muted-foreground">
-            Depending on traffic, this may take 1 to 2 minutes...
-          </CardDescription>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card shadow className="animate-appear max-w-lg">
-      <CardHeader>
-        <CardTitle>Pipecat {import.meta.env.VITE_APP_TITLE}</CardTitle>
-        <CardDescription>Check configuration below</CardDescription>
-      </CardHeader>
-      <CardContent stack>
-        <RoomSetup
-          serverUrl={serverUrl}
-          roomQs={roomQs}
-          roomQueryStringValid={checkRoomUrl(roomQs)}
-          handleCheckRoomUrl={(url) => setRoomUrl(url)}
-          roomError={roomError}
-        />
+      <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
+        <div className="mt-8">
+          <Loader className="h-8 w-8 animate-spin text-primary" />
+        </div>
+        <CardTitle className="text-lg font-medium">
+          {state === "requesting_agent" ? "Starting AI Assistant..." : "Connecting to call..."}
+        </CardTitle>
+        <CardDescription className="text-center text-sm text-muted-foreground">
+          Depending on traffic, this may take 1 to 2 minutes...
+        </CardDescription>
       </CardContent>
-      <CardFooter>
-        <Button
-          id="nextBtn"
-          fullWidthMobile
-          key="next"
-          disabled={
-            !!((roomQs && !roomError) || (autoRoomCreation && !serverUrl))
-          }
-          onClick={() => handleRoomUrl()}
-        >
-          Next <ArrowRight />
-        </Button>
-      </CardFooter>
     </Card>
   );
 }

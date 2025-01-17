@@ -14,7 +14,6 @@ export const PromptSelect: React.FC<SelectProps> = ({
       <h3 className="text-sm font-bold">Choose a Scenario</h3>
       <Select
         onChange={(e) => {
-          console.log('Selected prompt:', e.target.value);
           onSettingChange(e.target.value);
         }}
         value={selectedSetting || "default"}
