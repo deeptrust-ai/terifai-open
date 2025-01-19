@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "./components/ui/card";
 import { fetch_create_room, fetch_start_agent } from "./actions";
+import { VoiceUpload } from "./components/Setup/VoiceUpload";
 
 const isMaintenanceMode = import.meta.env.VITE_MAINTENANCE_MODE === "true";
 
@@ -53,6 +54,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [startAudioOff, setStartAudioOff] = useState<boolean>(false);
   const [roomUrl] = useState<string | null>(roomQs || null);
+  const [voiceFile, setVoiceFile] = useState<File | null>(null);
 
   async function start(selectedPrompt: string, redirect: boolean) {
     if (!daily || (!roomUrl && !autoRoomCreation)) return;
@@ -203,7 +205,8 @@ export default function App() {
             </CardDescription>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
+          <VoiceUpload onFileSelect={setVoiceFile} />
           <div className="space-y-2">
             <PromptSelect
               selectedSetting={selectedPrompt}
