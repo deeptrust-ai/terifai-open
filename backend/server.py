@@ -3,8 +3,10 @@ import contextlib
 import os
 import sys
 from dataclasses import asdict
+import wave
+import io
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from loguru import logger
@@ -12,6 +14,7 @@ from pydantic import BaseModel
 
 from backend.helpers import DailyConfig, get_daily_config, get_name_from_url, get_token
 from backend.spawn import get_status, spawn
+from modal import Cls, Function, functions
 
 # Bot machine dict for status reporting and concurrency control
 bot_machines = {}
@@ -75,6 +78,7 @@ class StartAgentItem(BaseModel):
     room_url: str
     token: str
     selected_prompt: str
+    voice_id: str
 
 
 @app.post("/start")
@@ -85,10 +89,11 @@ async def start_agent(item: StartAgentItem, request: Request) -> JSONResponse:
     room_url = item.room_url
     token = item.token
     selected_prompt = item.selected_prompt
-
+    voice_id = item.voice_id
+    print("Voice ID: ", voice_id)
     try:
         local = request.app.state.is_local_mode
-        bot_id = spawn(room_url, token, selected_prompt, local=local)
+        bot_id = spawn(room_url, token, selected_prompt, voice_id=voice_id, local=local)
         bot_machines[bot_id] = room_url
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to start bot: {e}")
@@ -108,6 +113,40 @@ def get_bot_status(bot_id: str, request: Request):
         raise HTTPException(status_code=404, detail=f"Bot with id: {bot_id} not found")
 
     return JSONResponse({"bot_id": bot_id, "status": status})
+
+
+@app.post("/clone_voice")
+async def clone_voice(voice_file: UploadFile = File(...)) -> JSONResponse:
+    try:
+        print("Cloning voice...")
+        # Read the voice file
+        voice_data = await voice_file.read()
+        print("read voice file")
+        
+        # Launch the clone job using Cartesia
+        add_cartesia_voice = Function.lookup("terifai-functions", "add_cartesia_voice")
+        job = add_cartesia_voice.spawn(voice_data)
+        print("launched job")
+        
+        # Get the job ID and poll for result
+        job_id = job.object_id
+        try:
+            function_call = functions.FunctionCall.from_id(job_id)
+            # Wait up to 30 seconds for the result
+            result = function_call.get(timeout=30)
+            print(f"Job completed successfully: {result}")
+            return JSONResponse({"voice_id": result})
+        except TimeoutError:
+            print("TimeoutError: Job is still running but we're returning the job ID")
+            return None
+        except Exception as e:
+            print(f"Error polling job: {e}")
+            raise None
+        
+        
+    except Exception as e:
+        print(f"Error in clone_voice: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":

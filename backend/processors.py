@@ -374,11 +374,13 @@ class CartesiaTerrify(CartesiaTTSService):
     def __init__(
         self,
         api_key: str = CARTESIA_API_KEY,
-        voice_id: str = DEFAULT_CARTESIA_VOICE_ID,
+        voice_id: str = "",
         selected_prompt=None,
         *args,
         **kwargs,
     ):
+        # Use DEFAULT_CARTESIA_VOICE_ID if voice_id is empty
+        voice_id = voice_id if voice_id else DEFAULT_CARTESIA_VOICE_ID
         super().__init__(api_key=api_key, voice_id=voice_id, *args, **kwargs)
         
         # voice data collection attributes

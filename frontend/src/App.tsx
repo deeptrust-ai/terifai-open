@@ -15,7 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "./components/ui/card";
-import { fetch_create_room, fetch_start_agent } from "./actions";
+import { cloneVoice, fetch_create_room, fetch_start_agent } from "./actions";
 import { VoiceUpload } from "./components/Setup/VoiceUpload";
 
 const isMaintenanceMode = import.meta.env.VITE_MAINTENANCE_MODE === "true";
@@ -30,6 +30,11 @@ type State =
   | "finished"
   | "error";
 
+interface CloneResult {
+  voice_id: string;
+  error?: boolean;
+  detail?: string;
+}
 
 // Server URL (ensure trailing slash)
 let serverUrl = import.meta.env.VITE_SERVER_URL;
@@ -65,7 +70,28 @@ export default function App() {
   async function start(selectedPrompt: string, redirect: boolean) {
     if (!daily || (!roomUrl && !autoRoomCreation)) return;
 
+    let cloneResult: CloneResult = { voice_id: "" };
+
+    // If it's a Join Call (redirect=true) and we have a voice file, clone it first
+    if (redirect && voiceFile) {
+      setState("requesting_agent");
+      try {
+        cloneResult = await cloneVoice(serverUrl, voiceFile);
+        console.log("cloneResult", cloneResult);
+        if (cloneResult.error) {
+          setError(cloneResult.detail || "Failed to clone voice");
+          setState("error");
+          return;
+        }
+      } catch (e) {
+        setError("Failed to clone voice");
+        setState("error");
+        return;
+      }
+    }
+
     let data;
+    console.log("Using voice_id:", cloneResult.voice_id);
 
     // Request agent to start, or join room directly
     if (import.meta.env.VITE_SERVER_URL) {
@@ -82,12 +108,14 @@ export default function App() {
           return;
         }
 
+        console.log("Using voice_id:", cloneResult.voice_id);
         // Start the agent with the room URL and token
         data = await fetch_start_agent(
           config.room_url,
           config.token,
           serverUrl,
-          selectedPrompt
+          selectedPrompt,
+          cloneResult.voice_id
         );
 
         if (data.error) {
@@ -212,7 +240,10 @@ export default function App() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <VoiceUpload onFileSelect={setVoiceFile} />
+          <VoiceUpload 
+            onFileSelect={setVoiceFile} 
+            serverUrl={serverUrl}
+          />
           <div className="space-y-2">
             <PromptSelect
               selectedSetting={selectedPrompt}
@@ -247,7 +278,7 @@ export default function App() {
                 size="lg"
                 className="w-full"
                 onClick={() => start(selectedPrompt, true)}
-                disabled={true}
+                disabled={!voiceFile}
               >
                 Join Call ☎️
               </Button>

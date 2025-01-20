@@ -50,7 +50,7 @@ else:
     logging.basicConfig(level=logging.INFO)
 
 
-async def main(room_url, token=None, xtts=False, elevenlabs=False, selected_prompt=None):
+async def main(room_url, token=None, xtts=False, elevenlabs=False, selected_prompt=None, voice_id=""):
     async with aiohttp.ClientSession() as session:
         # -------------- Transport --------------- #
 
@@ -94,7 +94,7 @@ async def main(room_url, token=None, xtts=False, elevenlabs=False, selected_prom
             )
         else:
             logging.info("Using Cartesia")
-            tts_service = CartesiaTerrify(selected_prompt=selected_prompt)
+            tts_service = CartesiaTerrify(selected_prompt=selected_prompt, voice_id=voice_id)
 
         # --------------- Setup ----------------- #
 
@@ -172,6 +172,7 @@ if __name__ == "__main__":
     parser.add_argument("--room_url", type=str, help="Room URL")
     parser.add_argument("--token", type=str, help="Token")
     parser.add_argument("--prompt", type=str, default="default", help="Specific Prompt")
+    parser.add_argument("--voice_id", type=str, default="", help="Voice ID")
     parser.add_argument("--default", action="store_true", help="Default configurations")
     parser.add_argument("--xtts", action="store_true", help="Use XTTS")
     parser.add_argument("--elevenlabs", action="store_true", help="Use ElevenLabs")
@@ -187,4 +188,4 @@ if __name__ == "__main__":
     if room_url is None:
         raise ValueError("Room URL is required")
 
-    asyncio.run(main(room_url, token, args.xtts, args.elevenlabs, args.prompt))
+    asyncio.run(main(room_url, token, args.xtts, args.elevenlabs, args.prompt, args.voice_id))
