@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDaily } from "@daily-co/daily-react";
 import { Ear, Loader } from "lucide-react";
 
@@ -55,6 +55,12 @@ export default function App() {
   const [startAudioOff, setStartAudioOff] = useState<boolean>(false);
   const [roomUrl] = useState<string | null>(roomQs || null);
   const [voiceFile, setVoiceFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    if (voiceFile) {
+      console.log("voiceFile state updated:", voiceFile);
+    }
+  }, [voiceFile]);
 
   async function start(selectedPrompt: string, redirect: boolean) {
     if (!daily || (!roomUrl && !autoRoomCreation)) return;
