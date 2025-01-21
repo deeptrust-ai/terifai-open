@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useEffect,useState } from "react";
 import { useDaily } from "@daily-co/daily-react";
 import { Ear, Loader } from "lucide-react";
 
 import MaintenancePage from "./components/MaintenancePage";
 import Session from "./components/Session";
 import { Configure, PromptSelect } from "./components/Setup";
+import { VoiceUpload } from "./components/Setup/VoiceUpload";
 import { Alert } from "./components/ui/alert";
 import { Button } from "./components/ui/button";
 import {
@@ -16,7 +17,6 @@ import {
   CardTitle,
 } from "./components/ui/card";
 import { cloneVoice, fetch_create_room, fetch_start_agent } from "./actions";
-import { VoiceUpload } from "./components/Setup/VoiceUpload";
 
 const isMaintenanceMode = import.meta.env.VITE_MAINTENANCE_MODE === "true";
 
@@ -72,8 +72,8 @@ export default function App() {
 
     let cloneResult: CloneResult = { voice_id: "" };
 
-    // If it's a Join Call (redirect=true) and we have a voice file, clone it first
-    if (redirect && voiceFile) {
+    // Clone voice if we have a file, regardless of which button was pressed
+    if (voiceFile) {
       setState("requesting_agent");
       try {
         cloneResult = await cloneVoice(serverUrl, voiceFile);
