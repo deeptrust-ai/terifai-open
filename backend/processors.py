@@ -380,6 +380,7 @@ class CartesiaTerrify(CartesiaTTSService):
         **kwargs,
     ):
         self._preupload_voice_id = voice_id
+        print("Preupload Voice ID: ", self._preupload_voice_id)
         # Use DEFAULT_CARTESIA_VOICE_ID if voice_id is empty
         voice_id = voice_id if voice_id else DEFAULT_CARTESIA_VOICE_ID
         super().__init__(api_key=api_key, voice_id=voice_id, *args, **kwargs)
@@ -498,6 +499,8 @@ class CartesiaTerrify(CartesiaTTSService):
 
         if self._voice_id == DEFAULT_CARTESIA_VOICE_ID:
             return
+        
+        print("Deleting Voice ID: ", self._voice_id)
 
         try:
             url = f"https://api.cartesia.ai/voices/{self._voice_id}"
