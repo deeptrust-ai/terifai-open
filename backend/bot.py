@@ -40,7 +40,16 @@ from backend.processors import (
     TranscriptionLogger,
     XTTSTerrify,
 )
-from backend.prompts import LLM_BASE_PROMPT, LLM_INTRO_PROMPT
+from backend.prompts import (
+    LLM_INTRO_PROMPT,
+    LLM_BASE_PROMPT,
+    LLM_VOICE_CHANGE_PROMPT_DEFAULT,
+    LLM_VOICE_CHANGE_PROMPT_IT_SUPPORT, 
+    LLM_VOICE_CHANGE_PROMPT_CORPORATE,
+    LLM_VOICE_CHANGE_PROMPT_FINANCE_FRAUD,
+    LLM_VOICE_CHANGE_PROMPT_ENGINEERING_BREACH,
+    LLM_VOICE_CHANGE_PROMPT_SECURITY_ALERT
+)
 
 load_dotenv()
 
@@ -48,6 +57,17 @@ if os.environ.get("DEBUG"):
     logging.basicConfig(level=logging.DEBUG)
 else:
     logging.basicConfig(level=logging.INFO)
+
+# voice change prompt map
+PROMPT_MAP = {
+    "default": LLM_VOICE_CHANGE_PROMPT_DEFAULT,
+    "it_support": LLM_VOICE_CHANGE_PROMPT_IT_SUPPORT,
+    "corporate": LLM_VOICE_CHANGE_PROMPT_CORPORATE,
+    "finance_fraud": LLM_VOICE_CHANGE_PROMPT_FINANCE_FRAUD,
+    "engineering_breach": LLM_VOICE_CHANGE_PROMPT_ENGINEERING_BREACH,
+    "security_alert": LLM_VOICE_CHANGE_PROMPT_SECURITY_ALERT,
+
+}
 
 
 async def main(room_url, token=None, xtts=False, elevenlabs=False, selected_prompt=None, voice_id=""):
@@ -98,6 +118,11 @@ async def main(room_url, token=None, xtts=False, elevenlabs=False, selected_prom
 
         # --------------- Setup ----------------- #
 
+        if voice_id:
+            LLM_START_PROMPT = PROMPT_MAP[selected_prompt]
+        else:
+            LLM_START_PROMPT = LLM_INTRO_PROMPT
+
         message_history = [LLM_BASE_PROMPT]
 
         # We need aggregators to keep track of user and LLM responses
@@ -146,7 +171,7 @@ async def main(room_url, token=None, xtts=False, elevenlabs=False, selected_prom
             logging.info(f"Participant joined: {participant['id']}")
             transport.capture_participant_transcription(participant["id"])
             time.sleep(1)
-            await task.queue_frame(LLMMessagesFrame([LLM_INTRO_PROMPT]))
+            await task.queue_frame(LLMMessagesFrame([LLM_START_PROMPT]))
 
         # When the participant leaves, we exit the bot.
         @transport.event_handler("on_participant_left")
