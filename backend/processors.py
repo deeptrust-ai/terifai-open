@@ -494,14 +494,15 @@ class CartesiaTerrify(CartesiaTTSService):
 
     def _delete_clone(self):
         """Deletes voice clone"""
-        if not self._job_completed:
+        
+        if not self._preupload_voice_id and not self._job_completed:
             return
 
         if self._voice_id == DEFAULT_CARTESIA_VOICE_ID:
             return
         
         print("Deleting Voice ID: ", self._voice_id)
-
+        
         try:
             url = f"https://api.cartesia.ai/voices/{self._voice_id}"
             headers = {"X-API-Key": self._api_key, "Cartesia-Version": "2024-06-10"}

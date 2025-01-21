@@ -15,7 +15,7 @@ from pydantic import BaseModel
 from backend.helpers import DailyConfig, get_daily_config, get_name_from_url, get_token
 from backend.spawn import get_status, spawn
 from modal import Cls, Function, functions
-
+from backend.voice_clone import test_cartesia_voice_clone
 # Bot machine dict for status reporting and concurrency control
 bot_machines = {}
 
@@ -124,16 +124,16 @@ async def clone_voice(voice_file: UploadFile = File(...)) -> JSONResponse:
         print("read voice file")
         
         # Launch the clone job using Cartesia
-        add_cartesia_voice = Function.lookup("terifai-functions", "add_cartesia_voice")
-        job = add_cartesia_voice.spawn(voice_data)
-        print("launched job")
+        # add_cartesia_voice = Function.lookup("terifai-functions", "add_cartesia_voice")
+        # job = add_cartesia_voice.spawn(voice_data)
+        # print("launched job")
         
-        # Get the job ID and poll for result
-        job_id = job.object_id
+        # # Get the job ID and poll for result
+        # job_id = job.object_id
         try:
-            function_call = functions.FunctionCall.from_id(job_id)
+            # function_call = functions.FunctionCall.from_id(job_id)
             # Wait up to 30 seconds for the result
-            result = function_call.get(timeout=30)
+            result = test_cartesia_voice_clone(voice_data)
             print(f"Job completed successfully: {result}")
             return JSONResponse({"voice_id": result})
         except TimeoutError:
