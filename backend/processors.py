@@ -494,9 +494,11 @@ class CartesiaTerrify(CartesiaTTSService):
     def _delete_clone(self):
         """Deletes voice clone"""
         
+        # If the voice is the default voice and voice was not stolen, do not delete
         if self._voice_id == DEFAULT_CARTESIA_VOICE_ID and not self._job_completed:
             return
 
+        # If the voice is the default voice and job was completed dont delete it
         if self._voice_id == DEFAULT_CARTESIA_VOICE_ID:
             return
         

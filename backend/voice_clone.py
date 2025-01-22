@@ -8,38 +8,6 @@ from modal import App, Image
 
 load_dotenv()
 
-def test_cartesia_voice_clone(audio: bytes):
-    url = "https://api.cartesia.ai/voices/clone"
-    api_key = os.getenv("CARTESIA_API_KEY")
-
-    # Use BytesIO to simulate a file
-    audio_file = BytesIO(audio)
-    filename = f"audio_{uuid.uuid4().hex[:8]}.wav"
-
-    files = {"clip": (filename, audio_file, "audio/wav")}
-    data = {
-        "name": "Terifai Voice Clone",
-        "language": "en",
-        "mode": "stability",
-        "enhance": True,
-    }
-
-    headers = {
-        "X-API-Key": api_key,
-        "Cartesia-Version": "2024-06-10"
-    }
-
-    try:
-        response = requests.post(url, data=data, files=files, headers=headers)
-        response.raise_for_status()
-        voice_id = response.json()["id"]
-        print(response.json())
-        print(f"Voice creation successful: {voice_id}")
-        return voice_id
-    except requests.exceptions.HTTPError as e:
-        print(f"Error response from API: {e.response.text}")
-        raise
-
 image = (
     Image.debian_slim()
     .pip_install("requests", "python-dotenv")

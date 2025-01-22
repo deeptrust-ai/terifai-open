@@ -4,7 +4,10 @@ import os
 import sys
 from dataclasses import asdict
 import wave
-import io
+from io import BytesIO
+import uuid
+import requests
+from dotenv import load_dotenv
 
 from fastapi import FastAPI, HTTPException, Request, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,12 +18,13 @@ from pydantic import BaseModel
 from backend.helpers import DailyConfig, get_daily_config, get_name_from_url, get_token
 from backend.spawn import get_status, spawn
 from modal import Cls, Function, functions
-from backend.voice_clone import test_cartesia_voice_clone
+from backend.voice_clone import cartesia_voice_clone
 # Bot machine dict for status reporting and concurrency control
 bot_machines = {}
 
 MAX_BOTS_PER_ROOM = 1
 
+load_dotenv()
 
 # Get local mode from command line args
 def get_local_mode() -> bool:
@@ -119,30 +123,36 @@ def get_bot_status(bot_id: str, request: Request):
 async def clone_voice(voice_file: UploadFile = File(...)) -> JSONResponse:
     try:
         print("Cloning voice...")
-        # Read the voice file
-        voice_data = await voice_file.read()
+        audio = await voice_file.read()
         print("read voice file")
-        
-        # Launch the clone job using Cartesia
-        # add_cartesia_voice = Function.lookup("terifai-functions", "add_cartesia_voice")
-        # job = add_cartesia_voice.spawn(voice_data)
-        # print("launched job")
-        
-        # # Get the job ID and poll for result
-        # job_id = job.object_id
+        url = "https://api.cartesia.ai/voices/clone"
+        api_key = os.getenv("CARTESIA_API_KEY")
+
+        # Use BytesIO to simulate a file
+        audio_file = BytesIO(audio)
+        filename = f"audio_{uuid.uuid4().hex[:8]}.wav"
+
+        files = {"clip": (filename, audio_file, "audio/wav")}
+        data = {
+            "name": "Terifai Voice Clone",
+            "language": "en",
+            "mode": "stability",
+            "enhance": True,
+        }
+
+        headers = {
+            "X-API-Key": api_key,
+            "Cartesia-Version": "2024-06-10"
+        }
         try:
-            # function_call = functions.FunctionCall.from_id(job_id)
-            # Wait up to 30 seconds for the result
-            result = test_cartesia_voice_clone(voice_data)
-            print(f"Job completed successfully: {result}")
-            return JSONResponse({"voice_id": result})
-        except TimeoutError:
-            print("TimeoutError: Job is still running but we're returning the job ID")
-            return None
-        except Exception as e:
-            print(f"Error polling job: {e}")
-            raise None
-        
+            response = requests.post(url, data=data, files=files, headers=headers)
+            response.raise_for_status()
+            voice_id = response.json()["id"]
+            print(f"Voice creation successful: {voice_id}")
+            return voice_id
+        except requests.exceptions.HTTPError as e:
+            print(f"Error response from API: {e.response.text}")
+            raise
         
     except Exception as e:
         print(f"Error in clone_voice: {e}")
