@@ -1,3 +1,9 @@
+"""
+This file contains the code for the voice cloning jobs that are run on Modal.
+
+The purpose is to maintain a clean experience for the user by offloading the voice cloning process to a separate service.
+"""
+
 import os
 import uuid
 from io import BytesIO
