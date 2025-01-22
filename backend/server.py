@@ -93,7 +93,7 @@ async def start_agent(item: StartAgentItem, request: Request) -> JSONResponse:
     token = item.token
     selected_prompt = item.selected_prompt
     voice_id = item.voice_id
-    print("Voice ID: ", voice_id)
+    
     try:
         local = request.app.state.is_local_mode
         bot_id = spawn(room_url, token, selected_prompt, voice_id=voice_id, local=local)
@@ -121,9 +121,9 @@ def get_bot_status(bot_id: str, request: Request):
 @app.post("/clone_voice")
 async def clone_voice(voice_file: UploadFile = File(...)) -> JSONResponse:
     try:
-        print("Cloning voice...")
+        
         audio = await voice_file.read()
-        print("read voice file")
+        
         url = "https://api.cartesia.ai/voices/clone"
         api_key = os.getenv("CARTESIA_API_KEY")
 

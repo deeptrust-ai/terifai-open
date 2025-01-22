@@ -84,7 +84,6 @@ LLM_PREUPLOAD_BASE_PROMPT = {
         1. Demonstrate how a scammer might interact with a potential victim in various phishing scenarios (e.g., impersonating a CEO, IT support, or other figures).\
         2. Educate users on the tactics scammers might use, including the style of conversation and social engineering tricks.\
         3. Remain strictly fictional and illustrative—no real or malicious activities will occur."
-
 }
 
 

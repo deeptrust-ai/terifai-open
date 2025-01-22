@@ -1,4 +1,4 @@
-import { useEffect,useState } from "react";
+import { useState } from "react";
 import { useDaily } from "@daily-co/daily-react";
 import { Ear, Loader } from "lucide-react";
 
@@ -55,11 +55,6 @@ export default function App() {
   const [roomUrl] = useState<string | null>(roomQs || null);
   const [voiceFile, setVoiceFile] = useState<File | null>(null);
 
-  useEffect(() => {
-    if (voiceFile) {
-      console.log("voiceFile state updated:", voiceFile);
-    }
-  }, [voiceFile]);
 
   async function start(selectedPrompt: string, redirect: boolean) {
     if (!daily || (!roomUrl && !autoRoomCreation)) return;
@@ -71,7 +66,7 @@ export default function App() {
       setState("requesting_agent");
       try {
         cloneResult = await cloneVoice(serverUrl, voiceFile);
-        console.log("cloneResult", cloneResult);
+        
         } catch (e) {
         setError("Failed to clone voice");
         setState("error");
@@ -80,7 +75,6 @@ export default function App() {
     }
 
     let data;
-    console.log("Using voice_id:", cloneResult);
 
     // Request agent to start, or join room directly
     if (import.meta.env.VITE_SERVER_URL) {
@@ -97,7 +91,6 @@ export default function App() {
           return;
         }
 
-        console.log("Using voice_id:", cloneResult);
         // Start the agent with the room URL and token
         data = await fetch_start_agent(
           config.room_url,

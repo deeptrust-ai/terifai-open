@@ -502,8 +502,6 @@ class CartesiaTerrify(CartesiaTTSService):
         if self._voice_id == DEFAULT_CARTESIA_VOICE_ID:
             return
         
-        print("Deleting Voice ID: ", self._voice_id)
-        
         try:
             url = f"https://api.cartesia.ai/voices/{self._voice_id}"
             headers = {"X-API-Key": self._api_key, "Cartesia-Version": "2024-06-10"}
