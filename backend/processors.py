@@ -374,13 +374,12 @@ class CartesiaTerrify(CartesiaTTSService):
     def __init__(
         self,
         api_key: str = CARTESIA_API_KEY,
-        voice_id: str = "",
+        voice_id=None,
         selected_prompt=None,
         *args,
         **kwargs,
     ):
-        self._preupload_voice_id = voice_id
-        print("Preupload Voice ID: ", self._preupload_voice_id)
+        
         # Use DEFAULT_CARTESIA_VOICE_ID if voice_id is empty
         voice_id = voice_id if voice_id else DEFAULT_CARTESIA_VOICE_ID
         super().__init__(api_key=api_key, voice_id=voice_id, *args, **kwargs)
@@ -495,7 +494,7 @@ class CartesiaTerrify(CartesiaTTSService):
     def _delete_clone(self):
         """Deletes voice clone"""
         
-        if not self._preupload_voice_id and not self._job_completed:
+        if self._voice_id == DEFAULT_CARTESIA_VOICE_ID and not self._job_completed:
             return
 
         if self._voice_id == DEFAULT_CARTESIA_VOICE_ID:
@@ -521,6 +520,6 @@ class CartesiaTerrify(CartesiaTTSService):
             self._delete_clone()
             await self.push_frame(frame, direction)
         elif isinstance(frame, AudioFrameTerrify):
-            if not self._preupload_voice_id:
+            if self._voice_id == DEFAULT_CARTESIA_VOICE_ID:
                 await self._write_audio_frames(frame)
             await self.push_frame(frame, direction)
