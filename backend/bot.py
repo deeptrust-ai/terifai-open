@@ -43,6 +43,7 @@ from backend.processors import (
 from backend.prompts import (
     LLM_INTRO_PROMPT,
     LLM_BASE_PROMPT,
+    LLM_PREUPLOAD_BASE_PROMPT,
     LLM_VOICE_CHANGE_PROMPT_DEFAULT,
     LLM_VOICE_CHANGE_PROMPT_IT_SUPPORT, 
     LLM_VOICE_CHANGE_PROMPT_CORPORATE,
@@ -120,10 +121,12 @@ async def main(room_url, token=None, xtts=False, elevenlabs=False, selected_prom
 
         if voice_id:
             LLM_START_PROMPT = PROMPT_MAP[selected_prompt]
+            llm_base_prompt = LLM_PREUPLOAD_BASE_PROMPT
         else:
             LLM_START_PROMPT = LLM_INTRO_PROMPT
+            llm_base_prompt = LLM_BASE_PROMPT
 
-        message_history = [LLM_BASE_PROMPT]
+        message_history = [llm_base_prompt]
 
         # We need aggregators to keep track of user and LLM responses
         llm_responses = LLMAssistantResponseAggregator(message_history)
