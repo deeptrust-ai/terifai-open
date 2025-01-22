@@ -30,12 +30,6 @@ type State =
   | "finished"
   | "error";
 
-interface CloneResult {
-  voice_id: string;
-  error?: boolean;
-  detail?: string;
-}
-
 // Server URL (ensure trailing slash)
 let serverUrl = import.meta.env.VITE_SERVER_URL;
 if (serverUrl && !serverUrl.endsWith("/")) serverUrl += "/";
@@ -70,7 +64,7 @@ export default function App() {
   async function start(selectedPrompt: string, redirect: boolean) {
     if (!daily || (!roomUrl && !autoRoomCreation)) return;
 
-    let cloneResult: CloneResult = { voice_id: "" };
+    let cloneResult = "";
 
     // Clone voice if we have a file, regardless of which button was pressed
     if (voiceFile) {
@@ -78,12 +72,7 @@ export default function App() {
       try {
         cloneResult = await cloneVoice(serverUrl, voiceFile);
         console.log("cloneResult", cloneResult);
-        if (cloneResult.error) {
-          setError(cloneResult.detail || "Failed to clone voice");
-          setState("error");
-          return;
-        }
-      } catch (e) {
+        } catch (e) {
         setError("Failed to clone voice");
         setState("error");
         return;
@@ -91,7 +80,7 @@ export default function App() {
     }
 
     let data;
-    console.log("Using voice_id:", cloneResult.voice_id);
+    console.log("Using voice_id:", cloneResult);
 
     // Request agent to start, or join room directly
     if (import.meta.env.VITE_SERVER_URL) {
@@ -108,14 +97,14 @@ export default function App() {
           return;
         }
 
-        console.log("Using voice_id:", cloneResult.voice_id);
+        console.log("Using voice_id:", cloneResult);
         // Start the agent with the room URL and token
         data = await fetch_start_agent(
           config.room_url,
           config.token,
           serverUrl,
           selectedPrompt,
-          cloneResult.voice_id
+          cloneResult
         );
 
         if (data.error) {

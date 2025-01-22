@@ -17,8 +17,7 @@ from pydantic import BaseModel
 
 from backend.helpers import DailyConfig, get_daily_config, get_name_from_url, get_token
 from backend.spawn import get_status, spawn
-from modal import Cls, Function, functions
-from backend.voice_clone import cartesia_voice_clone
+
 # Bot machine dict for status reporting and concurrency control
 bot_machines = {}
 
