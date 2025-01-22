@@ -63,6 +63,24 @@ The application will be running at:
 - Backend: http://localhost:8000
 - Frontend: http://localhost:3000
 
+### Deployment
+
+#### Server
+fly automaically deploys every commit to the `main` branch, but you can manually deploy with `fly deploy`
+
+#### Frontend
+Vercel handles the frontend deployment. It already automatically deploys every commit to the `main` branch.
+
+If you want to deploy manually, check their docs.
+
+#### Cloning Voice Jobs
+This happens in modal, so make sure you have a modal account and are logged in.
+```bash
+$ cd backend
+$ modal deploy jobs.py --env=dev # for dev deployment
+$ modal deploy jobs.py --env=main # for prod deployment
+```
+
 ### Development Tools
 
 #### Linting
