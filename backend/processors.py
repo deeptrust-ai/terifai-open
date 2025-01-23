@@ -33,7 +33,8 @@ from backend.prompts import (
     LLM_VOICE_CHANGE_PROMPT_CORPORATE,
     LLM_VOICE_CHANGE_PROMPT_FINANCE_FRAUD,
     LLM_VOICE_CHANGE_PROMPT_ENGINEERING_BREACH,
-    LLM_VOICE_CHANGE_PROMPT_SECURITY_ALERT
+    LLM_VOICE_CHANGE_PROMPT_SECURITY_ALERT,
+    transition_line
 )
 
 load_dotenv()
@@ -459,7 +460,8 @@ class CartesiaTerrify(CartesiaTTSService):
             elif self._job_id and (time.time() - self._last_poll_time) >= self._poll_interval:
                 result = self._poll_job()
                 if result:
-                    await self.push_frame(LLMMessagesUpdateFrame([PROMPT_MAP[self.selected_prompt]]), FrameDirection.DOWNSTREAM)
+                    new_prompt = {"role": "system", "content": PROMPT_MAP[self.selected_prompt] + transition_line}
+                    await self.push_frame(LLMMessagesUpdateFrame([new_prompt]), FrameDirection.DOWNSTREAM)
 
     async def _launch_clone_job(self, audio_data: bytes):
         """Launches a clone job with the given audio data"""

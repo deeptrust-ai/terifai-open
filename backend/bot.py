@@ -120,7 +120,10 @@ async def main(room_url, token=None, xtts=False, elevenlabs=False, selected_prom
         # --------------- Setup ----------------- #
 
         if voice_id:
-            LLM_START_PROMPT = PROMPT_MAP[selected_prompt]
+            LLM_START_PROMPT = {
+                "role": "system",
+                "content": PROMPT_MAP[selected_prompt]
+            }
             llm_base_prompt = LLM_PREUPLOAD_BASE_PROMPT
             
         else:
