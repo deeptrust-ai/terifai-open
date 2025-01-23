@@ -54,19 +54,21 @@ export default function App() {
   const [startAudioOff, setStartAudioOff] = useState<boolean>(false);
   const [roomUrl] = useState<string | null>(roomQs || null);
   const [voiceFile, setVoiceFile] = useState<File | null>(null);
+  const [isCloning, setIsCloning] = useState(false);
 
   async function start(selectedPrompt: string, redirect: boolean) {
     if (!daily || (!roomUrl && !autoRoomCreation)) return;
 
     let cloneResult = "";
 
-    // Clone voice if we have a file, regardless of which button was pressed
+    // Clone voice if we have a file
     if (voiceFile) {
       setState("requesting_agent");
+      setIsCloning(true);
       try {
         cloneResult = await cloneVoice(serverUrl, voiceFile);
-        
-        } catch (e) {
+        setIsCloning(false);
+      } catch (e) {
         setError("Failed to clone voice");
         setState("error");
         return;
@@ -280,10 +282,20 @@ export default function App() {
           <Loader className="h-8 w-8 animate-spin text-primary" />
         </div>
         <CardTitle className="text-lg font-medium">
-          {state === "requesting_agent" ? "Starting AI Assistant..." : "Connecting to call..."}
+          {isCloning ? (
+            "Cloning Voice..."
+          ) : state === "requesting_agent" ? (
+            "Starting AI Assistant..."
+          ) : (
+            "Connecting to call..."
+          )}
         </CardTitle>
         <CardDescription className="text-center text-sm text-muted-foreground">
-          Depending on traffic, this may take 1 to 2 minutes...
+          {isCloning ? (
+            "This may take up to 30 seconds..."
+          ) : (
+            "Depending on traffic, this may take 1 to 2 minutes..."
+          )}
         </CardDescription>
       </CardContent>
     </Card>
