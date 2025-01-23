@@ -237,9 +237,6 @@ export default function App() {
         <CardFooter className="flex flex-col gap-2">
           <div className="flex gap-3 w-full">
             <div className="flex-1">
-              <div className="text-xs text-primary font-bold text-center mb-1.5 invisible">
-                (Coming Soon 🤫)
-              </div>
               <Button
                 fullWidthMobile
                 size="lg"
@@ -253,9 +250,6 @@ export default function App() {
               </p>
             </div>
             <div className="flex-1">
-              <div className="text-xs text-primary font-bold text-center mb-1.5">
-                (Coming Soon 🤫)
-              </div>
               <Button
                 fullWidthMobile
                 size="lg"
