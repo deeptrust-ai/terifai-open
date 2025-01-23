@@ -179,7 +179,7 @@ export default function App() {
             size="lg"
             onClick={() => setState("configuring_step1")}
           >
-            Let's Get Started!
+            Let's Get Started! →
           </Button>
         </CardFooter>
       </Card>
