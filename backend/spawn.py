@@ -57,7 +57,7 @@ def spawn_local(room_url: str, token: str, selected_prompt: str, voice_id: str =
     return bot_id
 
 
-def spawn_fly(room_url: str, token: str, selected_prompt: str) -> str:
+def spawn_fly(room_url: str, token: str, selected_prompt: str, voice_id: str = "") -> str:
     """Spawn a fly machine and return its ID"""
     # Use the same image as the bot runner
     logger.debug(
@@ -71,7 +71,7 @@ def spawn_fly(room_url: str, token: str, selected_prompt: str) -> str:
     image = res.json()[0]["config"]["image"]
 
     # Machine configuration
-    cmd = f"python -m backend.bot --room_url {room_url} --token {token} --prompt {selected_prompt}"
+    cmd = f"python -m backend.bot --room_url {room_url} --token {token} --prompt {selected_prompt} --voice_id {voice_id}"
     cmd = cmd.split()
     worker_props = {
         "config": {
@@ -118,7 +118,7 @@ def spawn(room_url: str, token: str, selected_prompt: str, voice_id: str = "", l
     if local:
         return spawn_local(room_url, token, selected_prompt, voice_id)
     else:
-        return spawn_fly(room_url, token, selected_prompt)
+        return spawn_fly(room_url, token, selected_prompt, voice_id)
 
 
 def get_fly_status(vm_id: str) -> str:
