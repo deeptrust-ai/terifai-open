@@ -150,7 +150,7 @@ async def clone_voice(voice_file: UploadFile = File(...)) -> JSONResponse:
             print(f"Voice creation successful: {voice_id}")
             return voice_id
         except requests.exceptions.HTTPError as e:
-            print(f"Error response from API: {e.response.text}")
+            print(f"Error response from API: {str(e.response)}")
             raise
         
     except Exception as e:

@@ -55,7 +55,6 @@ export default function App() {
   const [roomUrl] = useState<string | null>(roomQs || null);
   const [voiceFile, setVoiceFile] = useState<File | null>(null);
 
-
   async function start(selectedPrompt: string, redirect: boolean) {
     if (!daily || (!roomUrl && !autoRoomCreation)) return;
 

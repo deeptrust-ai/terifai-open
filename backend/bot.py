@@ -122,6 +122,7 @@ async def main(room_url, token=None, xtts=False, elevenlabs=False, selected_prom
         if voice_id:
             LLM_START_PROMPT = PROMPT_MAP[selected_prompt]
             llm_base_prompt = LLM_PREUPLOAD_BASE_PROMPT
+            
         else:
             LLM_START_PROMPT = LLM_INTRO_PROMPT
             llm_base_prompt = LLM_BASE_PROMPT

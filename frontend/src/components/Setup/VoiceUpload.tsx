@@ -33,6 +33,11 @@ export const VoiceUpload: React.FC<VoiceUploadProps> = ({ onFileSelect }) => {
         setSelectedFile(null);
         onFileSelect(null);
         return;
+      } else if (duration > 20) {
+        setError("Audio file must be less than 20 seconds long");
+        setSelectedFile(null);
+        onFileSelect(null);
+        return;
       }
       setSelectedFile(file);
       onFileSelect(file);
@@ -48,7 +53,7 @@ export const VoiceUpload: React.FC<VoiceUploadProps> = ({ onFileSelect }) => {
       <div className="flex gap-2">
         <Input
           type="file"
-          accept="audio/wav"
+          accept="audio/wav,audio/mp3"
           onChange={handleFileChange}
           className="h-10 py-1.5 file:mr-4 file:py-1 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:opacity-80"
         />
