@@ -188,6 +188,7 @@ export default function App() {
             <span className="text-sm text-gray-500">built by</span>
             <a 
               href="https://www.deeptrust.ai" 
+              target="_blank"
               rel="noopener noreferrer"
             >
               <img src={deeptrust} alt="Deeptrust Logo" className="h-4 w-auto" />
