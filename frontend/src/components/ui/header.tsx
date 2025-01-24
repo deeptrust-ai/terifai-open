@@ -1,6 +1,5 @@
 import Logo from "../logo";
 import ExpiryTimer from "../Session/ExpiryTimer";
-
 const aCx =
   "underline decoration-primary-400/0 hover:decoration-primary-400 underline-offset-4 transition-all duration-300";
 
@@ -16,11 +15,15 @@ function Header() {
         </span>
 
         <nav className="pointer-events-none flex-row items-center gap-8 text-lg leading-7 hidden group-hover:flex group-hover:pointer-events-auto">
-          <a href="https://git.new/ai" target="_blank" className={aCx}>
-            GitHub
+          <a href="https://deeptrust.ai" target="_blank" className={aCx}>
+            Website
           </a>
-          <a href="https://discord.gg/pipecat" target="_blank" className={aCx}>
-            Discord
+          <a
+            href="https://www.linkedin.com/company/deeptrust-ai/"
+            target="_blank"
+            className={aCx}
+          >
+            LinkedIn
           </a>
         </nav>
       </div>

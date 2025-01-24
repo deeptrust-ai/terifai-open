@@ -18,6 +18,7 @@ export default {
       fontFamily: {
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
         mono: ["Space Mono", ...defaultTheme.fontFamily.mono],
+        montserrat: ["Montserrat", "sans-serif"],
       },
       container: {
         center: true,

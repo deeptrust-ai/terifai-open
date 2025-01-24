@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useDaily } from "@daily-co/daily-react";
 import { Ear, Loader } from "lucide-react";
 
+import deeptrust from "./assets/logos/deeptrust.png";
 import MaintenancePage from "./components/MaintenancePage";
 import Session from "./components/Session";
 import { Configure, PromptSelect } from "./components/Setup";
@@ -21,6 +22,7 @@ import { cloneVoice, fetch_create_room, fetch_start_agent } from "./actions";
 const isMaintenanceMode = import.meta.env.VITE_MAINTENANCE_MODE === "true";
 
 type State =
+  | "intro"
   | "configuring_step1"
   | "configuring_step2"
   | "requesting_agent"
@@ -48,7 +50,7 @@ const isOpenMic = parseInt(import.meta.env.VITE_OPEN_MIC) ? true : false;
 export default function App() {
   const daily = useDaily();
 
-  const [state, setState] = useState<State>("configuring_step1");
+  const [state, setState] = useState<State>("intro");
   const [selectedPrompt, setSelectedPrompt] = useState("default");
   const [error, setError] = useState<string | null>(null);
   const [startAudioOff, setStartAudioOff] = useState<boolean>(false);
@@ -172,14 +174,66 @@ export default function App() {
     );
   }
 
-  if (state === "configuring_step1") {
+  if (state === "intro") {
     return (
       <Card shadow className="animate-appear max-w-lg">
         <CardHeader>
-          <CardTitle>Configure your devices</CardTitle>
-          <CardDescription>
-            Please configure your microphone and speakers below
+          <CardTitle className="text-6xl font-extrabold text-primary font-sans tracking-tight">
+            TerifAI
+          </CardTitle>
+          <CardDescription className="text-2xl font-medium mt-3 font-montserrat">
+            Welcome to the AI Voice-Phishing Experience
           </CardDescription>
+          <div className="flex items-center justify-center gap-2 mt-2">
+            <span className="text-sm text-gray-500">built by</span>
+            <a 
+              href="https://www.deeptrust.ai" 
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img src={deeptrust} alt="Deeptrust Logo" className="h-4 w-auto" />
+            </a>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-col gap-2 bg-primary-50 px-4 py-3 md:p-3 rounded-md">
+            <p className="text-base text-pretty">
+              This app showcases how AI can be used to clone voices and impersonate others.
+              By understanding these risks, we can better protect ourselves and others.
+            </p>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button
+            fullWidthMobile
+            size="lg"
+            onClick={() => setState("configuring_step1")}
+          >
+            Let's Get Started! →
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  }
+
+  if (state === "configuring_step1") {
+    return (
+      <Card shadow className="animate-appear max-w-lg">
+        <CardHeader className="relative space-y-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute left-4 top-4 text-muted-foreground hover:text-foreground hover:bg-gray-50"
+            onClick={() => setState("intro")}
+          >
+            ← Back
+          </Button>
+          <div className="space-y-1.5 pt-6">
+            <CardTitle>Configure your devices</CardTitle>
+            <CardDescription>
+              Please configure your microphone and speakers below
+            </CardDescription>
+          </div>
         </CardHeader>
         <CardContent stack>
           <div className="flex flex-row gap-2 bg-primary-50 px-4 py-2 md:p-2 text-sm items-center justify-center rounded-md font-medium text-pretty">
