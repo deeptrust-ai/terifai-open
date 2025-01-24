@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useDaily } from "@daily-co/daily-react";
 import { Ear, Loader } from "lucide-react";
 
+import deeptrust from "./assets/logos/deeptrust.png";
 import MaintenancePage from "./components/MaintenancePage";
 import Session from "./components/Session";
 import { Configure, PromptSelect } from "./components/Setup";
@@ -183,6 +184,15 @@ export default function App() {
           <CardDescription className="text-2xl font-medium mt-3 font-montserrat">
             Welcome to the AI Voice-Phishing Experience
           </CardDescription>
+          <div className="flex items-center justify-center gap-2 mt-2">
+            <span className="text-sm text-gray-500">built by</span>
+            <a 
+              href="https://www.deeptrust.ai" 
+              rel="noopener noreferrer"
+            >
+              <img src={deeptrust} alt="Deeptrust Logo" className="h-4 w-auto" />
+            </a>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col gap-2 bg-primary-50 px-4 py-3 md:p-3 rounded-md">
