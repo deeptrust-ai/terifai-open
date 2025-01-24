@@ -18,7 +18,7 @@ export default {
       fontFamily: {
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
         mono: ["Space Mono", ...defaultTheme.fontFamily.mono],
-        montserrat: ['Montserrat', 'sans-serif'],
+        montserrat: ["Montserrat", "sans-serif"],
       },
       container: {
         center: true,
@@ -45,7 +45,7 @@ export default {
       },
       animation: {
         wiggle: "wiggle 0.2s 1",
-        appear: "appear 1.2s ease-out forwards",
+        appear: "appear 0.5s ease-out forwards",
       },
     },
   },
