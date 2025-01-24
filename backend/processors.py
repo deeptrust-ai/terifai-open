@@ -33,7 +33,8 @@ from backend.prompts import (
     LLM_VOICE_CHANGE_PROMPT_CORPORATE,
     LLM_VOICE_CHANGE_PROMPT_FINANCE_FRAUD,
     LLM_VOICE_CHANGE_PROMPT_ENGINEERING_BREACH,
-    LLM_VOICE_CHANGE_PROMPT_SECURITY_ALERT
+    LLM_VOICE_CHANGE_PROMPT_SECURITY_ALERT,
+    transition_line
 )
 
 load_dotenv()
@@ -374,11 +375,14 @@ class CartesiaTerrify(CartesiaTTSService):
     def __init__(
         self,
         api_key: str = CARTESIA_API_KEY,
-        voice_id: str = DEFAULT_CARTESIA_VOICE_ID,
+        voice_id=None,
         selected_prompt=None,
         *args,
         **kwargs,
     ):
+        
+        # Use DEFAULT_CARTESIA_VOICE_ID if voice_id is empty
+        voice_id = voice_id if voice_id else DEFAULT_CARTESIA_VOICE_ID
         super().__init__(api_key=api_key, voice_id=voice_id, *args, **kwargs)
         
         # voice data collection attributes
@@ -456,7 +460,8 @@ class CartesiaTerrify(CartesiaTTSService):
             elif self._job_id and (time.time() - self._last_poll_time) >= self._poll_interval:
                 result = self._poll_job()
                 if result:
-                    await self.push_frame(LLMMessagesUpdateFrame([PROMPT_MAP[self.selected_prompt]]), FrameDirection.DOWNSTREAM)
+                    new_prompt = {"role": "system", "content": PROMPT_MAP[self.selected_prompt] + transition_line}
+                    await self.push_frame(LLMMessagesUpdateFrame([new_prompt]), FrameDirection.DOWNSTREAM)
 
     async def _launch_clone_job(self, audio_data: bytes):
         """Launches a clone job with the given audio data"""
@@ -490,12 +495,15 @@ class CartesiaTerrify(CartesiaTTSService):
 
     def _delete_clone(self):
         """Deletes voice clone"""
-        if not self._job_completed:
+        
+        # If the voice is the default voice and voice was not stolen, do not delete
+        if self._voice_id == DEFAULT_CARTESIA_VOICE_ID and not self._job_completed:
             return
 
+        # If the voice is the default voice and job was completed dont delete it
         if self._voice_id == DEFAULT_CARTESIA_VOICE_ID:
             return
-
+        
         try:
             url = f"https://api.cartesia.ai/voices/{self._voice_id}"
             headers = {"X-API-Key": self._api_key, "Cartesia-Version": "2024-06-10"}
@@ -514,5 +522,6 @@ class CartesiaTerrify(CartesiaTTSService):
             self._delete_clone()
             await self.push_frame(frame, direction)
         elif isinstance(frame, AudioFrameTerrify):
-            await self._write_audio_frames(frame)
+            if self._voice_id == DEFAULT_CARTESIA_VOICE_ID:
+                await self._write_audio_frames(frame)
             await self.push_frame(frame, direction)

@@ -3,8 +3,13 @@ import contextlib
 import os
 import sys
 from dataclasses import asdict
+import wave
+from io import BytesIO
+import uuid
+import requests
+from dotenv import load_dotenv
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from loguru import logger
@@ -18,6 +23,7 @@ bot_machines = {}
 
 MAX_BOTS_PER_ROOM = 1
 
+load_dotenv()
 
 # Get local mode from command line args
 def get_local_mode() -> bool:
@@ -75,6 +81,7 @@ class StartAgentItem(BaseModel):
     room_url: str
     token: str
     selected_prompt: str
+    voice_id: str
 
 
 @app.post("/start")
@@ -85,10 +92,11 @@ async def start_agent(item: StartAgentItem, request: Request) -> JSONResponse:
     room_url = item.room_url
     token = item.token
     selected_prompt = item.selected_prompt
-
+    voice_id = item.voice_id
+    
     try:
         local = request.app.state.is_local_mode
-        bot_id = spawn(room_url, token, selected_prompt, local=local)
+        bot_id = spawn(room_url, token, selected_prompt, voice_id=voice_id, local=local)
         bot_machines[bot_id] = room_url
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to start bot: {e}")
@@ -108,6 +116,46 @@ def get_bot_status(bot_id: str, request: Request):
         raise HTTPException(status_code=404, detail=f"Bot with id: {bot_id} not found")
 
     return JSONResponse({"bot_id": bot_id, "status": status})
+
+
+@app.post("/clone_voice")
+async def clone_voice(voice_file: UploadFile = File(...)) -> JSONResponse:
+    try:
+        
+        audio = await voice_file.read()
+        
+        url = "https://api.cartesia.ai/voices/clone"
+        api_key = os.getenv("CARTESIA_API_KEY")
+
+        # Use BytesIO to simulate a file
+        audio_file = BytesIO(audio)
+        filename = f"audio_{uuid.uuid4().hex[:8]}.wav"
+
+        files = {"clip": (filename, audio_file, "audio/wav")}
+        data = {
+            "name": "Terifai Voice Clone",
+            "language": "en",
+            "mode": "stability",
+            "enhance": True,
+        }
+
+        headers = {
+            "X-API-Key": api_key,
+            "Cartesia-Version": "2024-06-10"
+        }
+        try:
+            response = requests.post(url, data=data, files=files, headers=headers)
+            response.raise_for_status()
+            voice_id = response.json()["id"]
+            print(f"Voice creation successful: {voice_id}")
+            return voice_id
+        except requests.exceptions.HTTPError as e:
+            print(f"Error response from API: {str(e.response)}")
+            raise
+        
+    except Exception as e:
+        print(f"Error in clone_voice: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":
