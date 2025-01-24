@@ -5,6 +5,7 @@ import { Ear, Loader } from "lucide-react";
 import MaintenancePage from "./components/MaintenancePage";
 import Session from "./components/Session";
 import { Configure, PromptSelect } from "./components/Setup";
+import { VoiceUpload } from "./components/Setup/VoiceUpload";
 import { Alert } from "./components/ui/alert";
 import { Button } from "./components/ui/button";
 import {
@@ -15,7 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "./components/ui/card";
-import { fetch_create_room, fetch_start_agent } from "./actions";
+import { cloneVoice, fetch_create_room, fetch_start_agent } from "./actions";
 
 const isMaintenanceMode = import.meta.env.VITE_MAINTENANCE_MODE === "true";
 
@@ -28,7 +29,6 @@ type State =
   | "started"
   | "finished"
   | "error";
-
 
 // Server URL (ensure trailing slash)
 let serverUrl = import.meta.env.VITE_SERVER_URL;
@@ -53,9 +53,27 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [startAudioOff, setStartAudioOff] = useState<boolean>(false);
   const [roomUrl] = useState<string | null>(roomQs || null);
+  const [voiceFile, setVoiceFile] = useState<File | null>(null);
+  const [isCloning, setIsCloning] = useState(false);
 
   async function start(selectedPrompt: string, redirect: boolean) {
     if (!daily || (!roomUrl && !autoRoomCreation)) return;
+
+    let cloneResult = "";
+
+    // Clone voice if we have a file
+    if (voiceFile) {
+      setState("requesting_agent");
+      setIsCloning(true);
+      try {
+        cloneResult = await cloneVoice(serverUrl, voiceFile);
+        setIsCloning(false);
+      } catch (e) {
+        setError("Failed to clone voice");
+        setState("error");
+        return;
+      }
+    }
 
     let data;
 
@@ -79,7 +97,8 @@ export default function App() {
           config.room_url,
           config.token,
           serverUrl,
-          selectedPrompt
+          selectedPrompt,
+          cloneResult
         );
 
         if (data.error) {
@@ -203,7 +222,11 @@ export default function App() {
             </CardDescription>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
+          <VoiceUpload 
+            onFileSelect={setVoiceFile} 
+            serverUrl={serverUrl}
+          />
           <div className="space-y-2">
             <PromptSelect
               selectedSetting={selectedPrompt}
@@ -214,9 +237,6 @@ export default function App() {
         <CardFooter className="flex flex-col gap-2">
           <div className="flex gap-3 w-full">
             <div className="flex-1">
-              <div className="text-xs text-primary font-bold text-center mb-1.5 invisible">
-                (Coming Soon 🤫)
-              </div>
               <Button
                 fullWidthMobile
                 size="lg"
@@ -230,15 +250,12 @@ export default function App() {
               </p>
             </div>
             <div className="flex-1">
-              <div className="text-xs text-primary font-bold text-center mb-1.5">
-                (Coming Soon 🤫)
-              </div>
               <Button
                 fullWidthMobile
                 size="lg"
                 className="w-full"
                 onClick={() => start(selectedPrompt, true)}
-                disabled={true}
+                disabled={!voiceFile}
               >
                 Join Call ☎️
               </Button>
@@ -259,10 +276,20 @@ export default function App() {
           <Loader className="h-8 w-8 animate-spin text-primary" />
         </div>
         <CardTitle className="text-lg font-medium">
-          {state === "requesting_agent" ? "Starting AI Assistant..." : "Connecting to call..."}
+          {isCloning ? (
+            "Cloning Voice..."
+          ) : state === "requesting_agent" ? (
+            "Starting AI Assistant..."
+          ) : (
+            "Connecting to call..."
+          )}
         </CardTitle>
         <CardDescription className="text-center text-sm text-muted-foreground">
-          Depending on traffic, this may take 1 to 2 minutes...
+          {isCloning ? (
+            "This may take up to 30 seconds..."
+          ) : (
+            "Depending on traffic, this may take 1 to 2 minutes..."
+          )}
         </CardDescription>
       </CardContent>
     </Card>

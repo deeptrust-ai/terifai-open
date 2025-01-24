@@ -20,18 +20,35 @@ export const fetch_start_agent = async (
   roomUrl: string,
   token: string,
   serverUrl: string,
-  selectedPrompt: string
+  selectedPrompt: string,
+  voiceId: string
 ) => {
   const req = await fetch(serverUrl + "start", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ room_url: roomUrl, token: token, selected_prompt: selectedPrompt }),
+    body: JSON.stringify({ room_url: roomUrl, token: token, selected_prompt: selectedPrompt, voice_id: voiceId }),
   });
 
   const data = await req.json();
 
+  if (!req.ok) {
+    return { error: true, detail: data.detail };
+  }
+  return data;
+};
+
+export const cloneVoice = async (serverUrl: string, voiceFile: File) => {
+  const formData = new FormData();
+  formData.append('voice_file', voiceFile);
+
+  const req = await fetch(serverUrl + "clone_voice", {
+    method: "POST",
+    body: formData,
+  });
+
+  const data = await req.json();
   if (!req.ok) {
     return { error: true, detail: data.detail };
   }

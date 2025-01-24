@@ -23,7 +23,7 @@ RETRY_DELAY = 5
 local_bots: Dict[str, Tuple[subprocess.Popen, str]] = {}
 
 
-def spawn_local(room_url: str, token: str, selected_prompt: str) -> str:
+def spawn_local(room_url: str, token: str, selected_prompt: str, voice_id: str = "") -> str:
     """Spawn a local bot process and return its ID"""
     bot_id = str(uuid.uuid4())
     logger.info(f"Spawning local bot with id: {bot_id}")
@@ -44,6 +44,7 @@ def spawn_local(room_url: str, token: str, selected_prompt: str) -> str:
             f"--room_url={room_url}",
             f"--token={token}",
             f"--prompt={selected_prompt}",
+            f"--voice_id={voice_id}",
         ],
         env=env,
         cwd=project_root,
@@ -56,7 +57,7 @@ def spawn_local(room_url: str, token: str, selected_prompt: str) -> str:
     return bot_id
 
 
-def spawn_fly(room_url: str, token: str, selected_prompt: str) -> str:
+def spawn_fly(room_url: str, token: str, selected_prompt: str, voice_id: str = "") -> str:
     """Spawn a fly machine and return its ID"""
     # Use the same image as the bot runner
     logger.debug(
@@ -70,7 +71,7 @@ def spawn_fly(room_url: str, token: str, selected_prompt: str) -> str:
     image = res.json()[0]["config"]["image"]
 
     # Machine configuration
-    cmd = f"python -m backend.bot --room_url {room_url} --token {token} --prompt {selected_prompt}"
+    cmd = f"python -m backend.bot --room_url {room_url} --token {token} --prompt {selected_prompt} --voice_id {voice_id}"
     cmd = cmd.split()
     worker_props = {
         "config": {
@@ -109,15 +110,15 @@ def spawn_fly(room_url: str, token: str, selected_prompt: str) -> str:
     raise Exception(f"Bot failed to enter started state after {MAX_RETRIES} retries")
 
 
-def spawn(room_url: str, token: str, selected_prompt: str, local: bool = False) -> str:
+def spawn(room_url: str, token: str, selected_prompt: str, voice_id: str = "", local: bool = False) -> str:
     """Unified interface to spawn a bot either locally or on Fly"""
     logger.debug(
         f"Spawning bot with room_url: {room_url} and token: {token}, local: {local}"
     )
     if local:
-        return spawn_local(room_url, token, selected_prompt)
+        return spawn_local(room_url, token, selected_prompt, voice_id)
     else:
-        return spawn_fly(room_url, token, selected_prompt)
+        return spawn_fly(room_url, token, selected_prompt, voice_id)
 
 
 def get_fly_status(vm_id: str) -> str:
