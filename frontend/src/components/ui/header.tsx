@@ -1,4 +1,4 @@
-import deeptrust from "../../assets/logos/deeptrust.png";
+import deeptrust from "../../assets/logos/mainlogo.png";
 import ExpiryTimer from "../Session/ExpiryTimer";
 
 function Header() {
@@ -13,7 +13,7 @@ function Header() {
           rel="noopener noreferrer"
           className="flex place-content-center transition-all"
         >
-          <img src={deeptrust} alt="TerifAI Logo" className="w-auto h-10" />
+          <img src={deeptrust} alt="TerifAI Logo" className="w-auto h-12" />
         </a>
       </div>
       <ExpiryTimer />
