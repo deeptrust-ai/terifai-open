@@ -57,8 +57,11 @@ export default function App() {
   const [roomUrl] = useState<string | null>(roomQs || null);
   const [voiceFile, setVoiceFile] = useState<File | null>(null);
   const [isCloning, setIsCloning] = useState(false);
+  const [customPrompt, setCustomPrompt] = useState("");
 
   async function start(selectedPrompt: string, redirect: boolean) {
+    // Log the current value of customPrompt
+    console.log("Custom Prompt:", customPrompt);
     if (!daily || (!roomUrl && !autoRoomCreation)) return;
 
     let cloneResult = "";
@@ -285,6 +288,7 @@ export default function App() {
             <PromptSelect
               selectedSetting={selectedPrompt}
               onSettingChange={setSelectedPrompt}
+              onCustomPromptChange={setCustomPrompt}
             />
           </div>
         </CardContent>
