@@ -60,6 +60,7 @@ export default function App() {
   const [voiceFile, setVoiceFile] = useState<File | null>(null);
   const [isCloning, setIsCloning] = useState(false);
   const [customPrompt, setCustomPrompt] = useState("");
+  const [generatedPrompt, setGeneratedPrompt] = useState("");
 
 
   async function processCustomPrompt(prompt: string) {
@@ -77,6 +78,7 @@ export default function App() {
       for await (const textPart of result.textStream) {
         console.log(textPart);
         fullResponse += textPart;
+        setGeneratedPrompt(fullResponse);
       }
       
       return fullResponse;
@@ -329,6 +331,12 @@ export default function App() {
               onSettingChange={setSelectedPrompt}
               onCustomPromptChange={setCustomPrompt}
             />
+            {selectedPrompt === 'custom' && generatedPrompt && (
+              <div className="mt-4 p-4 bg-gray-50 rounded-md border">
+                <p className="text-sm font-medium text-gray-700 mb-2">Generated Prompt:</p>
+                <p className="text-sm text-gray-600">{generatedPrompt}</p>
+              </div>
+            )}
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-2">
