@@ -21,14 +21,21 @@ export const fetch_start_agent = async (
   token: string,
   serverUrl: string,
   selectedPrompt: string,
-  voiceId: string
+  voiceId: string,
+  customGeneratedPrompt: string | null
 ) => {
   const req = await fetch(serverUrl + "start", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ room_url: roomUrl, token: token, selected_prompt: selectedPrompt, voice_id: voiceId }),
+    body: JSON.stringify({ 
+      room_url: roomUrl, 
+      token: token, 
+      selected_prompt: selectedPrompt, 
+      voice_id: voiceId,
+      custom_generated_prompt: customGeneratedPrompt
+    }),
   });
 
   const data = await req.json();

@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useDaily } from "@daily-co/daily-react";
-import { Ear, Loader } from "lucide-react";
+import { Ear } from "lucide-react";
 
 import deeptrust from "./assets/logos/deeptrust.png";
 import MaintenancePage from "./components/MaintenancePage";
 import Session from "./components/Session";
 import { Configure, PromptSelect } from "./components/Setup";
-import { CustomPromptGenerator } from "./components/Setup/CustomPromptGenerator";
+import { generateCustomPrompt } from "./components/Setup/CustomPromptGenerator";
 import { VoiceUpload } from "./components/Setup/VoiceUpload";
 import { Alert } from "./components/ui/alert";
 import { Button } from "./components/ui/button";
@@ -58,18 +58,25 @@ export default function App() {
   const [roomUrl] = useState<string | null>(roomQs || null);
   const [voiceFile, setVoiceFile] = useState<File | null>(null);
   const [isCloning, setIsCloning] = useState(false);
-  const [customPrompt, setCustomPrompt] = useState("");
+  const [customScenario, setCustomScenario] = useState("");
   const [generatedPrompt, setGeneratedPrompt] = useState("");
+  const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
 
   async function start(selectedPrompt: string, redirect: boolean) {
     if (selectedPrompt === 'custom') {
-      if (!generatedPrompt) {
-        setError("Please generate a prompt first");
+      setIsGeneratingPrompt(true);
+      try {
+        await generateCustomPrompt({
+          customScenario,
+          onGeneratedPrompt: setGeneratedPrompt
+        });
+      } catch (e) {
+        setError("Failed to generate prompt");
         setState("error");
         return;
+      } finally {
+        setIsGeneratingPrompt(false);
       }
-      // Use generatedPrompt instead of processing it again
-      console.log('Using generated prompt:', generatedPrompt);
     }
     
     if (!daily || (!roomUrl && !autoRoomCreation)) return;
@@ -113,7 +120,8 @@ export default function App() {
           config.token,
           serverUrl,
           selectedPrompt,
-          cloneResult
+          cloneResult,
+          selectedPrompt === 'custom' ? generatedPrompt : null
         );
 
         if (data.error) {
@@ -298,18 +306,15 @@ export default function App() {
             <PromptSelect
               selectedSetting={selectedPrompt}
               onSettingChange={setSelectedPrompt}
-              onCustomPromptChange={setCustomPrompt}
+              onCustomPromptChange={setCustomScenario}
             />
-            <CustomPromptGenerator
-              customPrompt={customPrompt}
-              onGeneratedPrompt={setGeneratedPrompt}
-              isVisible={selectedPrompt === 'custom'}
-            />
-            {selectedPrompt === 'custom' && generatedPrompt && (
-              <div className="mt-4 p-4 bg-gray-50 rounded-md border">
-                <p className="text-sm font-medium text-gray-700 mb-2">Generated Prompt:</p>
-                <p className="text-sm text-gray-600">{generatedPrompt}</p>
-              </div>
+            {selectedPrompt === 'custom' && (
+              <>
+                <div className="mt-4 p-4 bg-gray-50 rounded-md border">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Generated Prompt:</p>
+                  <p className="text-sm text-gray-600">{generatedPrompt}</p>
+                </div>
+              </>
             )}
           </div>
         </CardContent>
@@ -321,8 +326,15 @@ export default function App() {
                 size="lg"
                 className="w-full"
                 onClick={() => start(selectedPrompt, false)}
+                disabled={isGeneratingPrompt}
               >
-                Let's Chat 😊
+                {isGeneratingPrompt ? (
+                  <>
+                    Generating Prompt...
+                  </>
+                ) : (
+                  "Let's Chat 😊"
+                )}
               </Button>
               <p className="text-xs text-muted-foreground mt-1.5 text-center">
                 1:1 conversation with TerifAI
@@ -334,9 +346,15 @@ export default function App() {
                 size="lg"
                 className="w-full"
                 onClick={() => start(selectedPrompt, true)}
-                disabled={!voiceFile}
+                disabled={!voiceFile || isGeneratingPrompt}
               >
-                Join Call ☎️
+                {isGeneratingPrompt ? (
+                  <>
+                    Generating Prompt...
+                  </>
+                ) : (
+                  "Join Call ☎️"
+                )}
               </Button>
               <p className="text-xs text-muted-foreground mt-1.5 text-center">
                 Open video call with TerifAI
@@ -351,20 +369,26 @@ export default function App() {
   return (
     <Card shadow className="animate-appear max-w-lg">
       <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
-        <div className="mt-8">
-          <Loader className="h-8 w-8 animate-spin text-primary" />
-        </div>
-        <CardTitle className="text-lg font-medium">
-          {isCloning ? (
+        <div className="mt-8 text-lg font-medium">
+          {isGeneratingPrompt ? (
+            "Generating Custom Prompt..."
+          ) : isCloning ? (
             "Cloning Voice..."
           ) : state === "requesting_agent" ? (
             "Starting AI Assistant..."
           ) : (
             "Connecting to call..."
           )}
-        </CardTitle>
+        </div>
+        {isGeneratingPrompt && generatedPrompt && (
+          <div className="max-w-md w-full p-4 bg-gray-50 rounded-md border">
+            <p className="text-sm text-gray-600 whitespace-pre-wrap">{generatedPrompt}</p>
+          </div>
+        )}
         <CardDescription className="text-center text-sm text-muted-foreground">
-          {isCloning ? (
+          {isGeneratingPrompt ? (
+            "Generating your custom scenario..."
+          ) : isCloning ? (
             "This may take up to 30 seconds..."
           ) : (
             "Depending on traffic, this may take 1 to 2 minutes..."
