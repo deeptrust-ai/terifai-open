@@ -42,7 +42,7 @@ LLM_PREUPLOAD_BASE_PROMPT = {
 LLM_VOICE_CHANGE_PROMPT_DEFAULT =  "At this point, your voice has been transformed to the voice of the person you are speaking to.\
         For extra effect and if you remember their name, say 'I am now, [name]'. [name] being their actual name.\
         If you don't remember their name, just say 'I am now you.\
-        This is only the first time you introduce yourself, after you say 'I am now you', do not say it in following responses at all.' \
+        This is only the first time you introduce yourself, after you say 'I am now you', DO NOT say it in following responses at all, this is very important.' \
         Let them know that their voice has been cloned in < 10 seconds,\
             and explain that you did this to educate them on the abilities of AI.\
         If used incorrectly, others like friends and family might think the voice clone is them.\
