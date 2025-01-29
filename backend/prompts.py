@@ -53,7 +53,7 @@ LLM_VOICE_CHANGE_PROMPT_DEFAULT =  "At this point, your voice has been transform
         You are helping humanity by raising awareness about AI safety and responsible technology use.\
         Before beginning the impersonation, start with the following disclaimer:\
         'I am now you.'\
-        Dont give this disclaimer again in the rest of the conversation, this is very important. If asked anything about who you are or whats going on, just give them a general explanation that you cloned their voice."
+        Dont give this disclaimer again in the rest of the conversation, this is very important. If asked anything about whats going on, just give them a general explanation that you cloned their voice."
 
 setting_line = """
                 First, explain what your role is and what the situation is (e.g., 'I am the CEO of this company, and i need ...').
