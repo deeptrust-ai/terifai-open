@@ -60,10 +60,9 @@ export default function App() {
   const [voiceFile, setVoiceFile] = useState<File | null>(null);
   const [isCloning, setIsCloning] = useState(false);
   const [customPrompt, setCustomPrompt] = useState("");
-  const [isProcessingPrompt, setIsProcessingPrompt] = useState(false);
+
 
   async function processCustomPrompt(prompt: string) {
-    setIsProcessingPrompt(true);
     try {
       console.log(prompt);
       const openai = createOpenAI({
@@ -84,9 +83,7 @@ export default function App() {
     } catch (error) {
       console.error('Error processing prompt:', error);
       throw error;
-    } finally {
-      setIsProcessingPrompt(false);
-    }
+    } 
   }
 
   async function start(selectedPrompt: string, redirect: boolean) {
