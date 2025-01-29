@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { createOpenAI } from '@ai-sdk/openai';
 import { useDaily } from "@daily-co/daily-react";
-import { streamText } from 'ai';
 import { Ear, Loader } from "lucide-react";
 
 import deeptrust from "./assets/logos/deeptrust.png";
 import MaintenancePage from "./components/MaintenancePage";
 import Session from "./components/Session";
 import { Configure, PromptSelect } from "./components/Setup";
+import { CustomPromptGenerator } from "./components/Setup/CustomPromptGenerator";
 import { VoiceUpload } from "./components/Setup/VoiceUpload";
 import { Alert } from "./components/ui/alert";
 import { Button } from "./components/ui/button";
@@ -62,47 +61,17 @@ export default function App() {
   const [customPrompt, setCustomPrompt] = useState("");
   const [generatedPrompt, setGeneratedPrompt] = useState("");
 
-
-  async function processCustomPrompt(prompt: string) {
-    try {
-      console.log(prompt);
-      const openai = createOpenAI({
-        apiKey: import.meta.env.VITE_OPENAI_API_KEY
-      });
-      const result = await streamText({
-        model: openai('gpt-4-turbo'),
-        prompt: "Generate a prompt for an ai agent to impersonate someone in the following scenario: " + prompt,
-      });
-
-      let fullResponse = '';
-      for await (const textPart of result.textStream) {
-        console.log(textPart);
-        fullResponse += textPart;
-        setGeneratedPrompt(fullResponse);
-      }
-      
-      return fullResponse;
-    } catch (error) {
-      console.error('Error processing prompt:', error);
-      throw error;
-    } 
-  }
-
   async function start(selectedPrompt: string, redirect: boolean) {
     if (selectedPrompt === 'custom') {
-      try {
-        const processedPrompt = await processCustomPrompt(customPrompt);
-        // Use the processed prompt...
-        console.log('Processed prompt:', processedPrompt);
-      } catch (e) {
-        setError("Failed to process custom prompt");
+      if (!generatedPrompt) {
+        setError("Please generate a prompt first");
         setState("error");
         return;
       }
+      // Use generatedPrompt instead of processing it again
+      console.log('Using generated prompt:', generatedPrompt);
     }
     
-    // Log the current value of customPrompt
-    console.log("Custom Prompt:", customPrompt);
     if (!daily || (!roomUrl && !autoRoomCreation)) return;
 
     let cloneResult = "";
@@ -330,6 +299,11 @@ export default function App() {
               selectedSetting={selectedPrompt}
               onSettingChange={setSelectedPrompt}
               onCustomPromptChange={setCustomPrompt}
+            />
+            <CustomPromptGenerator
+              customPrompt={customPrompt}
+              onGeneratedPrompt={setGeneratedPrompt}
+              isVisible={selectedPrompt === 'custom'}
             />
             {selectedPrompt === 'custom' && generatedPrompt && (
               <div className="mt-4 p-4 bg-gray-50 rounded-md border">
