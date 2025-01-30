@@ -308,14 +308,6 @@ export default function App() {
               onSettingChange={setSelectedPrompt}
               onCustomPromptChange={setCustomScenario}
             />
-            {selectedPrompt === 'custom' && (
-              <>
-                <div className="mt-4 p-4 bg-gray-50 rounded-md border">
-                  <p className="text-sm font-medium text-gray-700 mb-2">Generated Prompt:</p>
-                  <p className="text-sm text-gray-600">{generatedPrompt}</p>
-                </div>
-              </>
-            )}
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-2">
@@ -380,11 +372,6 @@ export default function App() {
             "Connecting to call..."
           )}
         </div>
-        {isGeneratingPrompt && generatedPrompt && (
-          <div className="max-w-md w-full p-4 bg-gray-50 rounded-md border">
-            <p className="text-sm text-gray-600 whitespace-pre-wrap">{generatedPrompt}</p>
-          </div>
-        )}
         <CardDescription className="text-center text-sm text-muted-foreground">
           {isGeneratingPrompt ? (
             "Generating your custom scenario..."
