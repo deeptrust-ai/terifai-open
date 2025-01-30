@@ -61,8 +61,15 @@ export default function App() {
   const [customScenario, setCustomScenario] = useState("");
   const [generatedPrompt, setGeneratedPrompt] = useState("");
   const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
+  const [customError, setCustomError] = useState<string | null>(null);
 
   async function start(selectedPrompt: string, redirect: boolean) {
+    if (selectedPrompt === 'custom' && !customScenario.trim()) {
+      setCustomError("Please enter a scenario before continuing");
+      return;
+    }
+    setCustomError(null);
+    
     if (selectedPrompt === 'custom') {
       setIsGeneratingPrompt(true);
       try {
@@ -307,6 +314,7 @@ export default function App() {
               selectedSetting={selectedPrompt}
               onSettingChange={setSelectedPrompt}
               onCustomPromptChange={setCustomScenario}
+              error={customError}
             />
           </div>
         </CardContent>

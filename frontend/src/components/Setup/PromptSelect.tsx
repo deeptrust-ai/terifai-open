@@ -6,12 +6,14 @@ interface SelectProps {
   selectedSetting: string;
   onSettingChange: (value: string) => void;
   onCustomPromptChange?: (value: string) => void;
+  error?: string | null;
 }
 
 export const PromptSelect: React.FC<SelectProps> = ({ 
   onSettingChange,
   selectedSetting,
-  onCustomPromptChange 
+  onCustomPromptChange,
+  error 
 }) => {
   const [customPrompt, setCustomPrompt] = useState("");
 
@@ -45,6 +47,9 @@ export const PromptSelect: React.FC<SelectProps> = ({
             }}
             className="min-h-[100px] w-full rounded-md border border-primary-200 bg-transparent px-3 py-2 text-sm"
           />
+          {error && (
+            <p className="text-xs text-red-500 mt-1">{error}</p>
+          )}
         </div>
       )}
     </div>
