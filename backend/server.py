@@ -94,6 +94,7 @@ async def start_agent(item: StartAgentItem, request: Request) -> JSONResponse:
     selected_prompt = item.selected_prompt
     voice_id = item.voice_id
     custom_generated_prompt = item.custom_generated_prompt
+    print("custom generated prompt 3: ", custom_generated_prompt)
     
     try:
         local = request.app.state.is_local_mode

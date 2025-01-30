@@ -69,17 +69,17 @@ export default function App() {
       return;
     }
     setCustomError(null);
-    
-    // Immediately move to loading screen
     setState("requesting_agent");
     
+    let customPrompt = "";
     if (selectedPrompt === 'custom') {
       setIsGeneratingPrompt(true);
       try {
-        await generateCustomPrompt({
+        const result = await generateCustomPrompt({
           customScenario,
           onGeneratedPrompt: setGeneratedPrompt
         });
+        customPrompt = result;
       } catch (e) {
         setError("Failed to generate prompt");
         setState("error");
@@ -125,13 +125,14 @@ export default function App() {
         }
 
         // Start the agent with the room URL and token
+        console.log("Generated Prompt:", generatedPrompt);
         data = await fetch_start_agent(
           config.room_url,
           config.token,
           serverUrl,
           selectedPrompt,
           cloneResult,
-          selectedPrompt === 'custom' ? generatedPrompt : null
+          selectedPrompt === 'custom' ? customPrompt : null
         );
 
         if (data.error) {

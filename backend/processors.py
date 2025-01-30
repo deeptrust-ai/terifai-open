@@ -405,7 +405,7 @@ class CartesiaTerrify(CartesiaTTSService):
         # custom prompt
         self.selected_prompt = selected_prompt
         self.custom_generated_prompt = custom_generated_prompt
-
+        print("custom generated prompt 1: ", self.custom_generated_prompt)
         logger.info("CartesiaTerrify initialized")
 
     def set_voice_id(self, voice_id: str):
@@ -462,10 +462,12 @@ class CartesiaTerrify(CartesiaTTSService):
             elif self._job_id and (time.time() - self._last_poll_time) >= self._poll_interval:
                 result = self._poll_job()
                 if result:
+                    print("custom generated prompt: ", self.custom_generated_prompt)
                     if self.selected_prompt == 'custom' and self.custom_generated_prompt:
                         new_prompt = {"role": "system", "content": self.custom_generated_prompt + transition_line}
                     else:
                         new_prompt = {"role": "system", "content": PROMPT_MAP[self.selected_prompt] + transition_line}
+                    print("New prompt: ", new_prompt)
                     await self.push_frame(LLMMessagesUpdateFrame([new_prompt]), FrameDirection.DOWNSTREAM)
 
     async def _launch_clone_job(self, audio_data: bytes):
