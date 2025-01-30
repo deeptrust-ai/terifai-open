@@ -70,6 +70,9 @@ export default function App() {
     }
     setCustomError(null);
     
+    // Immediately move to loading screen
+    setState("requesting_agent");
+    
     if (selectedPrompt === 'custom') {
       setIsGeneratingPrompt(true);
       try {
@@ -92,15 +95,15 @@ export default function App() {
 
     // Clone voice if we have a file
     if (voiceFile) {
-      setState("requesting_agent");
       setIsCloning(true);
       try {
         cloneResult = await cloneVoice(serverUrl, voiceFile);
-        setIsCloning(false);
       } catch (e) {
         setError("Failed to clone voice");
         setState("error");
         return;
+      } finally {
+        setIsCloning(false);
       }
     }
 
@@ -326,15 +329,8 @@ export default function App() {
                 size="lg"
                 className="w-full"
                 onClick={() => start(selectedPrompt, false)}
-                disabled={isGeneratingPrompt}
               >
-                {isGeneratingPrompt ? (
-                  <>
-                    Generating Prompt...
-                  </>
-                ) : (
-                  "Let's Chat 😊"
-                )}
+                Let's Chat 😊
               </Button>
               <p className="text-xs text-muted-foreground mt-1.5 text-center">
                 1:1 conversation with TerifAI
@@ -346,15 +342,9 @@ export default function App() {
                 size="lg"
                 className="w-full"
                 onClick={() => start(selectedPrompt, true)}
-                disabled={!voiceFile || isGeneratingPrompt}
+                disabled={!voiceFile}
               >
-                {isGeneratingPrompt ? (
-                  <>
-                    Generating Prompt...
-                  </>
-                ) : (
-                  "Join Call ☎️"
-                )}
+                Join Call ☎️
               </Button>
               <p className="text-xs text-muted-foreground mt-1.5 text-center">
                 Open video call with TerifAI
@@ -380,6 +370,11 @@ export default function App() {
             "Connecting to call..."
           )}
         </div>
+        {isGeneratingPrompt && generatedPrompt && (
+          <div className="max-w-md w-full p-4 bg-gray-50 rounded-md border">
+            <p className="text-sm text-gray-600 whitespace-pre-wrap">{generatedPrompt}</p>
+          </div>
+        )}
         <CardDescription className="text-center text-sm text-muted-foreground">
           {isGeneratingPrompt ? (
             "Generating your custom scenario..."
