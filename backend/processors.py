@@ -463,6 +463,8 @@ class CartesiaTerrify(CartesiaTTSService):
                 if result:
                     if self.selected_prompt == 'custom' and self.custom_generated_prompt:
                         new_prompt = {"role": "system", "content": self.custom_generated_prompt + transition_line}
+                    elif self.selected_prompt == 'default':
+                        new_prompt = {"role": "system", "content": PROMPT_MAP[self.selected_prompt]}
                     else:
                         new_prompt = {"role": "system", "content": PROMPT_MAP[self.selected_prompt] + transition_line}
                     await self.push_frame(LLMMessagesUpdateFrame([new_prompt]), FrameDirection.DOWNSTREAM)
