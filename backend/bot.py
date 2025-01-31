@@ -120,7 +120,7 @@ async def main(room_url, token=None, xtts=False, elevenlabs=False, selected_prom
         # --------------- Setup ----------------- #
 
         if voice_id:
-            if selected_prompt == "custom" and custom_generated_prompt:
+            if selected_prompt == "custom":
                 LLM_START_PROMPT = {
                     "role": "system",
                     "content": custom_generated_prompt
