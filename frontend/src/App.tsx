@@ -124,8 +124,6 @@ export default function App() {
           return;
         }
 
-        // Start the agent with the room URL and token
-        console.log("Generated Prompt:", generatedPrompt);
         data = await fetch_start_agent(
           config.room_url,
           config.token,
