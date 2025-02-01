@@ -372,7 +372,7 @@ export default function App() {
             "Connecting to call..."
           )}
         </div>
-        {isGeneratingPrompt && generatedPrompt && (
+        {(isGeneratingPrompt || generatedPrompt) && (
           <div className="max-w-md w-full p-4 bg-gray-50 rounded-md border">
             <p className="text-sm text-gray-600 whitespace-pre-wrap">{generatedPrompt}</p>
           </div>
