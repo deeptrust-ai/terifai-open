@@ -372,20 +372,18 @@ export default function App() {
             "Connecting to call..."
           )}
         </div>
-        {(isGeneratingPrompt || generatedPrompt) && (
-          <div className="max-w-md w-full p-4 bg-gray-50 rounded-md border">
-            <p className="text-sm text-gray-600 whitespace-pre-wrap">{generatedPrompt}</p>
-          </div>
-        )}
         <CardDescription className="text-center text-sm text-muted-foreground">
-          {isGeneratingPrompt ? (
-            "Generating your custom scenario..."
-          ) : isCloning ? (
+          {isCloning ? (
             "This may take up to 30 seconds..."
           ) : (
             "Depending on traffic, this may take 1 to 2 minutes..."
           )}
         </CardDescription>
+        {(isGeneratingPrompt || generatedPrompt) && (
+          <div className="max-w-md w-full p-4 bg-gray-50 rounded-md border">
+            <p className="text-sm text-gray-600 whitespace-pre-wrap">{generatedPrompt}</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
