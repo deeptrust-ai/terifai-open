@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDaily } from "@daily-co/daily-react";
-import { Ear } from "lucide-react";
+import { Ear, Loader } from "lucide-react";
 
 import deeptrust from "./assets/logos/deeptrust.png";
 import MaintenancePage from "./components/MaintenancePage";
@@ -358,6 +358,9 @@ export default function App() {
   return (
     <Card shadow className="animate-appear max-w-lg">
       <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
+        <div className="mt-8">
+          <Loader className="h-8 w-8 animate-spin text-primary" />
+        </div>
         <div className="mt-8 text-lg font-medium">
           {isGeneratingPrompt ? (
             "Generating Custom Prompt..."
