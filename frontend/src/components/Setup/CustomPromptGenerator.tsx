@@ -1,5 +1,6 @@
 import { createOpenAI } from '@ai-sdk/openai';
-import { streamText } from 'ai';
+import { Output, streamText } from 'ai';
+import { z } from 'zod';
 
 interface CustomPromptGeneratorProps {
   customScenario: string;
@@ -14,16 +15,26 @@ export async function generateCustomPrompt({
     const openai = createOpenAI({
       apiKey: import.meta.env.VITE_OPENAI_API_KEY
     });
+
     const customPrompt = "This is a reference prompt im currently using for my ai agent in the scenario of an IT Specialist:\n" + referencePrompt + "\n\n" + "Use it as a reference, but modify it to fit the following scenario: " + customScenario;
-    const result = await streamText({
+    
+    const { experimental_partialOutputStream } = await streamText({
       model: openai('gpt-4-turbo'),
-      prompt: customPrompt
+      prompt: customPrompt,
+      experimental_output: Output.object({
+        schema: z.object({
+          prompt: z.string().describe('The generated prompt for the AI agent'),
+        }),
+      }),
     });
 
     let fullResponse = '';
-    for await (const textPart of result.textStream) {
-      fullResponse += textPart;
-      onGeneratedPrompt(fullResponse);
+    for await (const chunk of experimental_partialOutputStream) {
+      if (chunk.prompt) {
+        fullResponse = chunk.prompt;
+        onGeneratedPrompt(fullResponse);
+        console.log(fullResponse);
+      }
     }
     
     return fullResponse;
