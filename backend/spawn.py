@@ -23,7 +23,7 @@ RETRY_DELAY = 5
 local_bots: Dict[str, Tuple[subprocess.Popen, str]] = {}
 
 
-def spawn_local(room_url: str, token: str, selected_prompt: str, voice_id: str = "", custom_generated_prompt: str | None = None) -> str:
+def spawn_local(room_url: str, token: str, selected_prompt: str, voice_id: str = "", custom_prompt: str | None = None) -> str:
     """Spawn a local bot process and return its ID"""
     bot_id = str(uuid.uuid4())
     logger.info(f"Spawning local bot with id: {bot_id}")
@@ -45,7 +45,7 @@ def spawn_local(room_url: str, token: str, selected_prompt: str, voice_id: str =
             f"--token={token}",
             f"--prompt={selected_prompt}",
             f"--voice_id={voice_id}",
-            f"--custom_generated_prompt={custom_generated_prompt}",
+            f"--custom_prompt={custom_prompt}",
         ],
         env=env,
         cwd=project_root,
@@ -111,13 +111,13 @@ def spawn_fly(room_url: str, token: str, selected_prompt: str, voice_id: str = "
     raise Exception(f"Bot failed to enter started state after {MAX_RETRIES} retries")
 
 
-def spawn(room_url: str, token: str, selected_prompt: str, voice_id: str = "", local: bool = False, custom_generated_prompt: str | None = None) -> str:
+def spawn(room_url: str, token: str, selected_prompt: str, voice_id: str = "", local: bool = False, custom_prompt: str | None = None) -> str:
     """Unified interface to spawn a bot either locally or on Fly"""
     logger.debug(
         f"Spawning bot with room_url: {room_url} and token: {token}, local: {local}"
     )
     if local:
-        return spawn_local(room_url, token, selected_prompt, voice_id, custom_generated_prompt)
+        return spawn_local(room_url, token, selected_prompt, voice_id, custom_prompt)
     else:
         return spawn_fly(room_url, token, selected_prompt, voice_id)
 

@@ -29,7 +29,7 @@ from pipecat.services.xtts import XTTSService
 
 from backend.prompts import (
     LLM_VOICE_CHANGE_PROMPT_DEFAULT,
-    LLM_VOICE_CHANGE_PROMPT_IT_SUPPORT, 
+    LLM_VOICE_CHANGE_PROMPT_IT_SUPPORT,
     LLM_VOICE_CHANGE_PROMPT_CORPORATE,
     LLM_VOICE_CHANGE_PROMPT_FINANCE_FRAUD,
     LLM_VOICE_CHANGE_PROMPT_ENGINEERING_BREACH,
@@ -377,15 +377,15 @@ class CartesiaTerrify(CartesiaTTSService):
         api_key: str = CARTESIA_API_KEY,
         voice_id=None,
         selected_prompt=None,
-        custom_generated_prompt=None,
+        custom_prompt=None,
         *args,
         **kwargs,
     ):
-        
+
         # Use DEFAULT_CARTESIA_VOICE_ID if voice_id is empty
         voice_id = voice_id if voice_id else DEFAULT_CARTESIA_VOICE_ID
         super().__init__(api_key=api_key, voice_id=voice_id, *args, **kwargs)
-        
+
         # voice data collection attributes
         self._num_channels = 1
         self._sample_rate = 16000
@@ -404,7 +404,7 @@ class CartesiaTerrify(CartesiaTTSService):
 
         # custom prompt
         self.selected_prompt = selected_prompt
-        self.custom_generated_prompt = custom_generated_prompt
+        self.custom_prompt = custom_prompt
         logger.info("CartesiaTerrify initialized")
 
     def set_voice_id(self, voice_id: str):
@@ -461,8 +461,8 @@ class CartesiaTerrify(CartesiaTTSService):
             elif self._job_id and (time.time() - self._last_poll_time) >= self._poll_interval:
                 result = self._poll_job()
                 if result:
-                    if self.selected_prompt == 'custom' and self.custom_generated_prompt:
-                        new_prompt = {"role": "system", "content": self.custom_generated_prompt + transition_line}
+                    if self.selected_prompt == 'custom' and self.custom_prompt:
+                        new_prompt = {"role": "system", "content": self.custom_prompt + transition_line}
                     elif self.selected_prompt == 'default':
                         new_prompt = {"role": "system", "content": PROMPT_MAP[self.selected_prompt]}
                     else:
@@ -501,7 +501,7 @@ class CartesiaTerrify(CartesiaTTSService):
 
     def _delete_clone(self):
         """Deletes voice clone"""
-        
+
         # If the voice is the default voice and voice was not stolen, do not delete
         if self._voice_id == DEFAULT_CARTESIA_VOICE_ID and not self._job_completed:
             return
@@ -509,7 +509,7 @@ class CartesiaTerrify(CartesiaTTSService):
         # If the voice is the default voice and job was completed dont delete it
         if self._voice_id == DEFAULT_CARTESIA_VOICE_ID:
             return
-        
+
         try:
             url = f"https://api.cartesia.ai/voices/{self._voice_id}"
             headers = {"X-API-Key": self._api_key, "Cartesia-Version": "2024-06-10"}
