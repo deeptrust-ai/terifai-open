@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useDaily } from "@daily-co/daily-react";
-import { Ear, Loader } from "lucide-react";
+import { Ear } from "lucide-react";
 
 import deeptrust from "./assets/logos/deeptrust.png";
 import MaintenancePage from "./components/MaintenancePage";
 import Session from "./components/Session";
 import { Configure, PromptSelect } from "./components/Setup";
+import { generateCustomPrompt } from "./components/Setup/CustomPromptGenerator";
 import { VoiceUpload } from "./components/Setup/VoiceUpload";
 import { Alert } from "./components/ui/alert";
 import { Button } from "./components/ui/button";
@@ -57,23 +58,52 @@ export default function App() {
   const [roomUrl] = useState<string | null>(roomQs || null);
   const [voiceFile, setVoiceFile] = useState<File | null>(null);
   const [isCloning, setIsCloning] = useState(false);
+  const [customScenario, setCustomScenario] = useState("");
+  const [generatedPrompt, setGeneratedPrompt] = useState("");
+  const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
+  const [customError, setCustomError] = useState<string | null>(null);
 
   async function start(selectedPrompt: string, redirect: boolean) {
+    if (selectedPrompt === 'custom' && !customScenario.trim()) {
+      setCustomError("Please enter a scenario before continuing");
+      return;
+    }
+    setCustomError(null);
+    setState("requesting_agent");
+    
+    let customPrompt = "";
+    if (selectedPrompt === 'custom') {
+      setIsGeneratingPrompt(true);
+      try {
+        const result = await generateCustomPrompt({
+          customScenario,
+          onGeneratedPrompt: setGeneratedPrompt
+        });
+        customPrompt = result;
+      } catch (e) {
+        setError("Failed to generate prompt");
+        setState("error");
+        return;
+      } finally {
+        setIsGeneratingPrompt(false);
+      }
+    }
+    
     if (!daily || (!roomUrl && !autoRoomCreation)) return;
 
     let cloneResult = "";
 
     // Clone voice if we have a file
     if (voiceFile) {
-      setState("requesting_agent");
       setIsCloning(true);
       try {
         cloneResult = await cloneVoice(serverUrl, voiceFile);
-        setIsCloning(false);
       } catch (e) {
         setError("Failed to clone voice");
         setState("error");
         return;
+      } finally {
+        setIsCloning(false);
       }
     }
 
@@ -94,13 +124,13 @@ export default function App() {
           return;
         }
 
-        // Start the agent with the room URL and token
         data = await fetch_start_agent(
           config.room_url,
           config.token,
           serverUrl,
           selectedPrompt,
-          cloneResult
+          cloneResult,
+          selectedPrompt === 'custom' ? customPrompt : null
         );
 
         if (data.error) {
@@ -285,6 +315,8 @@ export default function App() {
             <PromptSelect
               selectedSetting={selectedPrompt}
               onSettingChange={setSelectedPrompt}
+              onCustomPromptChange={setCustomScenario}
+              error={customError}
             />
           </div>
         </CardContent>
@@ -326,20 +358,26 @@ export default function App() {
   return (
     <Card shadow className="animate-appear max-w-lg">
       <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
-        <div className="mt-8">
-          <Loader className="h-8 w-8 animate-spin text-primary" />
-        </div>
-        <CardTitle className="text-lg font-medium">
-          {isCloning ? (
+        <div className="mt-8 text-lg font-medium">
+          {isGeneratingPrompt ? (
+            "Generating Custom Prompt..."
+          ) : isCloning ? (
             "Cloning Voice..."
           ) : state === "requesting_agent" ? (
             "Starting AI Assistant..."
           ) : (
             "Connecting to call..."
           )}
-        </CardTitle>
+        </div>
+        {isGeneratingPrompt && generatedPrompt && (
+          <div className="max-w-md w-full p-4 bg-gray-50 rounded-md border">
+            <p className="text-sm text-gray-600 whitespace-pre-wrap">{generatedPrompt}</p>
+          </div>
+        )}
         <CardDescription className="text-center text-sm text-muted-foreground">
-          {isCloning ? (
+          {isGeneratingPrompt ? (
+            "Generating your custom scenario..."
+          ) : isCloning ? (
             "This may take up to 30 seconds..."
           ) : (
             "Depending on traffic, this may take 1 to 2 minutes..."

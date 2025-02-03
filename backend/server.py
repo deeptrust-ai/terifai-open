@@ -82,7 +82,7 @@ class StartAgentItem(BaseModel):
     token: str
     selected_prompt: str
     voice_id: str
-
+    custom_prompt: str | None
 
 @app.post("/start")
 async def start_agent(item: StartAgentItem, request: Request) -> JSONResponse:
@@ -93,10 +93,11 @@ async def start_agent(item: StartAgentItem, request: Request) -> JSONResponse:
     token = item.token
     selected_prompt = item.selected_prompt
     voice_id = item.voice_id
-    
+    custom_prompt = item.custom_prompt
+
     try:
         local = request.app.state.is_local_mode
-        bot_id = spawn(room_url, token, selected_prompt, voice_id=voice_id, local=local)
+        bot_id = spawn(room_url, token, selected_prompt, voice_id=voice_id, local=local, custom_prompt=custom_prompt)
         bot_machines[bot_id] = room_url
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to start bot: {e}")
@@ -121,9 +122,9 @@ def get_bot_status(bot_id: str, request: Request):
 @app.post("/clone_voice")
 async def clone_voice(voice_file: UploadFile = File(...)) -> JSONResponse:
     try:
-        
+
         audio = await voice_file.read()
-        
+
         url = "https://api.cartesia.ai/voices/clone"
         api_key = os.getenv("CARTESIA_API_KEY")
 
@@ -152,7 +153,7 @@ async def clone_voice(voice_file: UploadFile = File(...)) -> JSONResponse:
         except requests.exceptions.HTTPError as e:
             print(f"Error response from API: {str(e.response)}")
             raise
-        
+
     except Exception as e:
         print(f"Error in clone_voice: {e}")
         raise HTTPException(status_code=500, detail=str(e))

@@ -45,7 +45,7 @@ from backend.prompts import (
     LLM_BASE_PROMPT,
     LLM_PREUPLOAD_BASE_PROMPT,
     LLM_VOICE_CHANGE_PROMPT_DEFAULT,
-    LLM_VOICE_CHANGE_PROMPT_IT_SUPPORT, 
+    LLM_VOICE_CHANGE_PROMPT_IT_SUPPORT,
     LLM_VOICE_CHANGE_PROMPT_CORPORATE,
     LLM_VOICE_CHANGE_PROMPT_FINANCE_FRAUD,
     LLM_VOICE_CHANGE_PROMPT_ENGINEERING_BREACH,
@@ -71,7 +71,7 @@ PROMPT_MAP = {
 }
 
 
-async def main(room_url, token=None, xtts=False, elevenlabs=False, selected_prompt=None, voice_id=""):
+async def main(room_url, token=None, xtts=False, elevenlabs=False, selected_prompt=None, voice_id="", custom_prompt=None):
     async with aiohttp.ClientSession() as session:
         # -------------- Transport --------------- #
 
@@ -115,17 +115,23 @@ async def main(room_url, token=None, xtts=False, elevenlabs=False, selected_prom
             )
         else:
             logging.info("Using Cartesia")
-            tts_service = CartesiaTerrify(selected_prompt=selected_prompt, voice_id=voice_id)
+            tts_service = CartesiaTerrify(selected_prompt=selected_prompt, voice_id=voice_id, custom_prompt=custom_prompt)
 
         # --------------- Setup ----------------- #
 
         if voice_id:
-            LLM_START_PROMPT = {
-                "role": "system",
-                "content": PROMPT_MAP[selected_prompt]
-            }
-            llm_base_prompt = LLM_PREUPLOAD_BASE_PROMPT
-            
+            if selected_prompt == "custom":
+                LLM_START_PROMPT = {
+                    "role": "system",
+                    "content": custom_prompt
+                }
+                llm_base_prompt = LLM_PREUPLOAD_BASE_PROMPT
+            else:
+                LLM_START_PROMPT = {
+                    "role": "system",
+                    "content": PROMPT_MAP[selected_prompt]
+                }
+                llm_base_prompt = LLM_PREUPLOAD_BASE_PROMPT
         else:
             LLM_START_PROMPT = LLM_INTRO_PROMPT
             llm_base_prompt = LLM_BASE_PROMPT
@@ -205,13 +211,14 @@ if __name__ == "__main__":
     parser.add_argument("--token", type=str, help="Token")
     parser.add_argument("--prompt", type=str, default="default", help="Specific Prompt")
     parser.add_argument("--voice_id", type=str, default="", help="Voice ID")
+    parser.add_argument("--custom_prompt", type=str, default="", help="Custom Generated Prompt")
     parser.add_argument("--default", action="store_true", help="Default configurations")
     parser.add_argument("--xtts", action="store_true", help="Use XTTS")
     parser.add_argument("--elevenlabs", action="store_true", help="Use ElevenLabs")
     args = parser.parse_args()
     room_url = args.room_url
     token = args.token
-    
+
     if args.default:
         config = get_daily_config()
         room_url = config.room_url
@@ -220,4 +227,4 @@ if __name__ == "__main__":
     if room_url is None:
         raise ValueError("Room URL is required")
 
-    asyncio.run(main(room_url, token, args.xtts, args.elevenlabs, args.prompt, args.voice_id))
+    asyncio.run(main(room_url, token, args.xtts, args.elevenlabs, args.prompt, args.voice_id, args.custom_prompt))
